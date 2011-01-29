@@ -3,6 +3,7 @@
 #
 
 klib-y := setjmp.o syscall.o vfork.o
+klib-y += open.o openat.o
 
 always  := crt0.o
 targets := crt0.o

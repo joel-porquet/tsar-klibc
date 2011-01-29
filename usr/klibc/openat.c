@@ -10,7 +10,7 @@
 #include <fcntl.h>
 #include <bitsize.h>
 
-#if _BITSIZE == 32 && !defined(__i386__) && defined(__NR_openat)
+#if _BITSIZE == 32 && !defined(__i386__) && !defined(__m68k__) && defined(__NR_openat)
 
 extern int __openat(int, const char *, int, mode_t);
 

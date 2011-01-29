@@ -15,14 +15,9 @@ vfork:
 	move.l	(%sp)+, %d1		/* Return address */
 	move.l	# __NR_vfork, %d0
 	trap	#0
-	move.l	%d1, -(%sp)
-	cmpi.l	#-4095, %d0
-	blt.l	1f
-	neg.l	%d0
-	move.l	%d0, (errno)
-	moveq	#-1, %d0
-1:
-	movea.l	%d0, %a0
-	rts
+	move.l	%d1, -(%sp)		/* restore stack */
+
+	/* fallthrough into common code from syscall.S */
+	bra	__syscall_checkandout
 
 	.size	vfork, .-vfork

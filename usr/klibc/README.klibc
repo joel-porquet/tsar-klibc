@@ -43,7 +43,7 @@ b) If you're cross-compiling, you need to set KLIBCARCH to the
    i386:	 Working
    ia64:	 Working static, shared untested
    m32r:	 Untested
-   m68k:	 Untested
+   m68k:	 Working
    m68knommu:	 Not yet ported
    mips:	 Working
    mips64:	 Not yet ported

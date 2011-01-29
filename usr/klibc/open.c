@@ -10,7 +10,7 @@
 #include <fcntl.h>
 #include <bitsize.h>
 
-#if _BITSIZE == 32 && !defined(__i386__)
+#if _BITSIZE == 32 && !defined(__i386__) && !defined(__m68k__)
 
 extern int __open(const char *, int, mode_t);
 
