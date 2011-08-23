@@ -28,4 +28,14 @@ struct bootp_hdr {
 	/* 312 bytes of extensions */
 };
 
+/*
+ * memory size of BOOTP Vendor Extensions/DHCP Options for receiving
+ *
+ * generic_ether_mtu:1500, min_sizeof(ip_hdr):20, sizeof(udp_hdr):8
+ *
+ * #define BOOTP_EXTS_SIZE	(1500 - 20 - 8 - sizeof(struct bootp_hdr))
+ */
+/* larger size for backward compatibility of ipconfig */
+#define BOOTP_EXTS_SIZE	1500
+
 #endif /* BOOTP_PACKET_H */

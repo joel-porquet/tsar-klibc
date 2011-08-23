@@ -25,6 +25,7 @@ static uint8_t dhcp_params[] = {
 	26,			/* interface mtu */
 	28,			/* broadcast addr */
 	40,			/* NIS domain name (why?) */
+	119,			/* Domain Search Option */
 };
 
 static uint8_t dhcp_discover_hdr[] = {
@@ -158,7 +159,7 @@ static int dhcp_parse(struct netdev *dev, struct bootp_hdr *hdr,
 static int dhcp_recv(struct netdev *dev)
 {
 	struct bootp_hdr bootp;
-	uint8_t dhcp_options[1500];
+	uint8_t dhcp_options[BOOTP_EXTS_SIZE];
 	struct iovec iov[] = {
 		/* [0] = ip + udp header */
 		[1] = {&bootp, sizeof(struct bootp_hdr)},

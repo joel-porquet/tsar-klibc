@@ -43,6 +43,7 @@ struct netdev {
 	char nisdomainname[SYS_NMLN];	/* nis domain name      */
 	char bootpath[BPLEN];	/* boot path            */
 	char filename[FNLEN];   /* filename             */
+	char *domainsearch;	/* decoded, NULL or malloc-ed  */
 	long uptime;		/* when complete configuration */
 	struct netdev *next;	/* next configured i/f  */
 };

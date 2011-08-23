@@ -176,6 +176,8 @@ static void dump_device_config(struct netdev *dev)
 		write_option(f, "UPTIME", buf21);
 		sprintf(buf21, "%u", (unsigned int)dev->dhcpleasetime);
 		write_option(f, "DHCPLEASETIME", buf21);
+		write_option(f, "DOMAINSEARCH", dev->domainsearch == NULL ?
+			     "" : dev->domainsearch);
 		fclose(f);
 	}
 }

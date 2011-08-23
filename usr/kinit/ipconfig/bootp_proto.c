@@ -56,11 +56,226 @@ int bootp_send_request(struct netdev *dev)
 }
 
 /*
+ * DESCRIPTION
+ *  bootp_ext119_decode() decodes Domain Search Option data.
+ *  The decoded string is separated with ' '.
+ *  For example, it is either "foo.bar.baz. bar.baz.", "foo.bar.", or "foo.".
+ *
+ * ARGUMENTS
+ *  const uint8_t *ext
+ *   *ext is a pointer to a DHCP Domain Search Option data. *ext does not
+ *   include a tag(code) octet and a length octet in DHCP options.
+ *   For example, if *ext is {3, 'f', 'o', 'o', 0}, this function returns
+ *   a pointer to a "foo." string.
+ *
+ *  int16_t ext_size
+ *   ext_size is the memory size of *ext. For example,
+ *   if *ext is {3, 'f', 'o', 'o', 0}, ext_size must be 5.
+ *
+ *  uint8_t *tmp
+ *   *tmp is a pointer to a temporary memory space for decoding.
+ *   The memory size must be equal to or more than ext_size.
+ *   'memset(tmp, 0, sizeof(tmp));' is not required, but values in *tmp
+ *   are changed in decoding process.
+ *
+ * RETURN VALUE
+ *  if OK, a pointer to a decoded string malloc-ed
+ *  else , NULL
+ *
+ * SEE ALSO RFC3397
+ */
+static char *bootp_ext119_decode(const void *ext, int16_t ext_size, void *tmp)
+{
+	uint8_t *u8ext;
+	int_fast32_t i;
+	int_fast32_t decoded_size;
+	int_fast8_t currentdomain_is_singledot;
+
+	/* only for validating *ext */
+	uint8_t *is_pointee;
+	int_fast32_t is_pointee_size;
+
+	/* only for structing a decoded string */
+	char *decoded_str;
+	int_fast32_t dst_i;
+
+	if (ext == NULL || ext_size <= 0 || tmp == NULL)
+		return NULL;
+
+	u8ext = (uint8_t *)ext;
+	is_pointee = tmp;
+	memset(is_pointee, 0, (size_t)ext_size);
+	is_pointee_size = 0;
+
+	/*
+	 * validate the format of *ext and
+	 * calculate the memory size for a decoded string
+	 */
+	i = 0;
+	decoded_size = 0;
+	currentdomain_is_singledot = 1;
+	while (1) {
+		if (i >= ext_size)
+			return NULL;
+
+		if (u8ext[i] == 0) {
+			/* Zero-ending */
+			if (currentdomain_is_singledot)
+				decoded_size++; /* for '.' */
+			decoded_size++; /* for ' ' or '\0' */
+			currentdomain_is_singledot = 1;
+			i++;
+			if (i == ext_size)
+				break;
+			is_pointee_size = i;
+		} else if (u8ext[i] < 0x40) {
+			/* Label(sub-domain string) */
+			int j;
+
+			/* loosely validate characters for domain names */
+			if (i + u8ext[i] >= ext_size)
+				return NULL;
+			for (j = i + 1; j <= i + u8ext[i]; j++)
+				if (!(u8ext[j] == '-' ||
+				     ('0' <= u8ext[j] && u8ext[j] <= '9') ||
+				     ('A' <= u8ext[j] && u8ext[j] <= 'Z') ||
+				     ('a' <= u8ext[j] && u8ext[j] <= 'z')))
+					return NULL;
+
+			is_pointee[i] = 1;
+			decoded_size += u8ext[i] + 1; /* for Label + '.' */
+			currentdomain_is_singledot = 0;
+			i += u8ext[i] + 1;
+		} else if (u8ext[i] < 0xc0)
+			return NULL;
+
+		else {
+			/* Compression-pointer (to a prior Label) */
+			int_fast32_t p;
+
+			if (i + 1 >= ext_size)
+				return NULL;
+
+			p = ((0x3f & u8ext[i]) << 8) + u8ext[i + 1];
+			if (!(p < is_pointee_size && is_pointee[p]))
+				return NULL;
+
+			while (1) {
+				/* u8ext[p] was validated */
+				if (u8ext[p] == 0) {
+					/* Zero-ending */
+					decoded_size++;
+					break;
+				} else if (u8ext[p] < 0x40) {
+					/* Label(sub-domain string) */
+					decoded_size += u8ext[p] + 1;
+					p += u8ext[p] + 1;
+				} else {
+					/* Compression-pointer */
+					p = ((0x3f & u8ext[p]) << 8)
+						+ u8ext[p + 1];
+				}
+			}
+
+			currentdomain_is_singledot = 1;
+			i += 2;
+			if (i == ext_size)
+				break;
+			is_pointee_size = i;
+		}
+	}
+
+
+	/*
+	 * construct a decoded string
+	 */
+	decoded_str = malloc(decoded_size);
+	if (decoded_str == NULL)
+		return NULL;
+
+	i = 0;
+	dst_i = 0;
+	currentdomain_is_singledot = 1;
+	while (1) {
+		if (u8ext[i] == 0) {
+			/* Zero-ending */
+			if (currentdomain_is_singledot) {
+				if (dst_i != 0)
+					dst_i++;
+				decoded_str[dst_i] = '.';
+			}
+			dst_i++;
+			decoded_str[dst_i] = ' ';
+
+			currentdomain_is_singledot = 1;
+			i++;
+			if (i == ext_size)
+				break;
+		} else if (u8ext[i] < 0x40) {
+			/* Label(sub-domain string) */
+			if (dst_i != 0)
+				dst_i++;
+			memcpy(&decoded_str[dst_i], &u8ext[i + 1],
+			       (size_t)u8ext[i]);
+			dst_i += u8ext[i];
+			decoded_str[dst_i] = '.';
+
+			currentdomain_is_singledot = 0;
+			i += u8ext[i] + 1;
+		} else {
+			/* Compression-pointer (to a prior Label) */
+			int_fast32_t p;
+
+			p = ((0x3f & u8ext[i]) << 8) + u8ext[i + 1];
+			while (1) {
+				if (u8ext[p] == 0) {
+					/* Zero-ending */
+					decoded_str[dst_i++] = '.';
+					decoded_str[dst_i] = ' ';
+					break;
+				} else if (u8ext[p] < 0x40) {
+					/* Label(sub-domain string) */
+					dst_i++;
+					memcpy(&decoded_str[dst_i],
+					       &u8ext[p + 1],
+					       (size_t)u8ext[p]);
+					dst_i += u8ext[p];
+					decoded_str[dst_i] = '.';
+
+					p += u8ext[p] + 1;
+				} else {
+					/* Compression-pointer */
+					p = ((0x3f & u8ext[p]) << 8)
+						+ u8ext[p + 1];
+				}
+			}
+
+			currentdomain_is_singledot = 1;
+			i += 2;
+			if (i == ext_size)
+				break;
+		}
+	}
+	decoded_str[dst_i] = '\0';
+#ifdef DEBUG
+	if (dst_i + 1 != decoded_size) {
+		dprintf("bug:%s():bottom: malloc(%ld), write(%ld)\n",
+			__func__, (long)decoded_size, (long)(dst_i + 1));
+		exit(1);
+	}
+#endif
+	return decoded_str;
+}
+
+/*
  * Parse a bootp reply packet
  */
 int bootp_parse(struct netdev *dev, struct bootp_hdr *hdr,
 		uint8_t *exts, int extlen)
 {
+	uint8_t ext119_buf[BOOTP_EXTS_SIZE];
+	int16_t ext119_len = 0;
+
 	dev->bootp.gateway	= hdr->giaddr;
 	dev->ip_addr		= hdr->yiaddr;
 	dev->ip_server		= hdr->siaddr;
@@ -143,9 +358,30 @@ int bootp_parse(struct netdev *dev, struct bootp_hdr *hdr,
 				if (len == 4 && !dev->ip_server)
 					memcpy(&dev->ip_server, ext, 4);
 				break;
+			case 119:	/* Domain Search Option */
+				if (ext119_len >= 0 &&
+				    ext119_len + len <= sizeof(ext119_buf)) {
+					memcpy(ext119_buf + ext119_len,
+					       ext, len);
+					ext119_len += len;
+				} else
+					ext119_len = -1;
+
+				break;
 			}
 
 			ext += len;
+		}
+	}
+	if (ext119_len > 0) {
+		char *ret;
+		uint8_t ext119_tmp[BOOTP_EXTS_SIZE];
+
+		ret = bootp_ext119_decode(ext119_buf, ext119_len, ext119_tmp);
+		if (ret != NULL) {
+			if (dev->domainsearch != NULL)
+				free(dev->domainsearch);
+			dev->domainsearch = ret;
 		}
 	}
 
@@ -165,11 +401,11 @@ int bootp_parse(struct netdev *dev, struct bootp_hdr *hdr,
 int bootp_recv_reply(struct netdev *dev)
 {
 	struct bootp_hdr bootp;
-	uint8_t bootp_options[312];
+	uint8_t bootp_options[BOOTP_EXTS_SIZE];
 	struct iovec iov[] = {
 		/* [0] = ip + udp headers */
 		[1] = {&bootp, sizeof(struct bootp_hdr)},
-		[2] = {bootp_options, 312}
+		[2] = {bootp_options, sizeof(bootp_options)}
 	};
 	int ret;
 
