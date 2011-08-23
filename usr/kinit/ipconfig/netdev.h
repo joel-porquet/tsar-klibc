@@ -28,6 +28,7 @@ struct netdev {
 		int fd;
 	} rarp;
 
+	uint8_t proto;          /* a protocol used (e.g. PROTO_DHCP) */
 	uint32_t ip_addr;	/* my address           */
 	uint32_t ip_broadcast;	/* broadcast address    */
 	uint32_t ip_server;	/* server address       */

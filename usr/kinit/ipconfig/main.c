@@ -45,6 +45,20 @@ struct state {
 	struct state *next;
 };
 
+/* #define PROTO_x : for uint8_t proto of struct netdev */
+struct protoinfo {
+	char *name;
+} protoinfos[] = {
+#define PROTO_NONE  0
+	{"none"},
+#define PROTO_BOOTP 1
+	{"bootp"},
+#define PROTO_DHCP  2
+	{"dhcp"},
+#define PROTO_RARP  3
+	{"rarp"}
+};
+
 static inline const char *my_inet_ntoa(uint32_t addr)
 {
 	struct in_addr a;
@@ -56,9 +70,13 @@ static inline const char *my_inet_ntoa(uint32_t addr)
 
 static void print_device_config(struct netdev *dev)
 {
-	printf("IP-Config: %s complete (from %s):\n", dev->name,
-	       my_inet_ntoa(dev->serverid ? dev->serverid : dev->ip_server));
-	printf(" address: %-16s ", my_inet_ntoa(dev->ip_addr));
+	printf("IP-Config: %s complete", dev->name);
+	if (dev->proto == PROTO_BOOTP || dev->proto == PROTO_DHCP)
+		printf(" (%s from %s)", protoinfos[dev->proto].name,
+		       my_inet_ntoa(dev->serverid ?
+				    dev->serverid : dev->ip_server));
+
+	printf(":\n address: %-16s ", my_inet_ntoa(dev->ip_addr));
 	printf("broadcast: %-16s ", my_inet_ntoa(dev->ip_broadcast));
 	printf("netmask: %-16s\n", my_inet_ntoa(dev->ip_netmask));
 	printf(" gateway: %-16s ", my_inet_ntoa(dev->ip_gateway));
@@ -134,6 +152,7 @@ static void dump_device_config(struct netdev *dev)
 	f = fopen(fn, "w");
 	if (f) {
 		write_option(f, "DEVICE", dev->name);
+		write_option(f, "PROTO", protoinfos[dev->proto].name);
 		write_option(f, "IPV4ADDR",
 				my_inet_ntoa(dev->ip_addr));
 		write_option(f, "IPV4BROADCAST",
@@ -231,6 +250,7 @@ static int process_receive_event(struct state *s, time_t now)
 			break;
 		case 1:
 			s->state = DEVST_COMPLETE;
+			s->dev->proto = PROTO_BOOTP;
 			dprintf("\n   bootp reply\n");
 			break;
 		}
@@ -263,6 +283,7 @@ static int process_receive_event(struct state *s, time_t now)
 			break;
 		case DHCPACK:	/* ACK received */
 			s->state = DEVST_COMPLETE;
+			s->dev->proto = PROTO_DHCP;
 			break;
 		case DHCPNAK:	/* NAK received */
 			s->state = DEVST_DHCPDISC;
@@ -598,8 +619,10 @@ static void bringup_device(struct netdev *dev)
 	if (netdev_up(dev) == 0) {
 		if (dev->caps)
 			add_one_dev(dev);
-		else
+		else {
+			dev->proto = PROTO_NONE;
 			complete_device(dev);
+		}
 	}
 }
 
