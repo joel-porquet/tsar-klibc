@@ -92,20 +92,35 @@ static int dhcp_parse(struct netdev *dev, struct bootp_hdr *hdr,
 		uint8_t *ext;
 
 		for (ext = exts + 4; ext - exts < extlen;) {
-			uint8_t len, *opt = ext++;
-			if (*opt == 0)
-				continue;
+			int len;
+			uint8_t opt = *ext++;
 
+			if (opt == 0)
+				continue;
+			else if (opt == 255)
+				break;
+
+			if (ext - exts >= extlen)
+				break;
 			len = *ext++;
 
+			if (ext - exts + len > extlen)
+				break;
+			switch (opt) {
+			case 51:	/* IP Address Lease Time */
+				if (len == 4)
+					leasetime = ntohl(*(uint32_t *)ext);
+				break;
+			case 53:	/* DHCP Message Type */
+				if (len == 1)
+					type = *ext;
+				break;
+			case 54:	/* Server Identifier */
+				if (len == 4)
+					memcpy(&serverid, ext, 4);
+				break;
+			}
 			ext += len;
-
-			if (*opt == 51 && len == 4)
-				leasetime = ntohl(*(uint32_t *)(opt + 2));
-			if (*opt == 53)
-				type = opt[2];
-			if (*opt == 54)
-				memcpy(&serverid, opt + 2, 4);
 		}
 	}
 

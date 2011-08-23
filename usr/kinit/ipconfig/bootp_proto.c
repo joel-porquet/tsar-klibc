@@ -87,8 +87,12 @@ int bootp_parse(struct netdev *dev, struct bootp_hdr *hdr,
 			else if (opt == 255)
 				break;
 
+			if (ext - exts >= extlen)
+				break;
 			len = *ext++;
 
+			if (ext - exts + len > extlen)
+				break;
 			switch (opt) {
 			case 1:	/* subnet mask */
 				if (len == 4)
