@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#include <sys/sysinfo.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <unistd.h>		/* for getopts */
@@ -123,6 +124,11 @@ static void dump_device_config(struct netdev *dev)
 {
 	char fn[40];
 	FILE *f;
+	/*
+	 * char UINT64_MAX[] = "18446744073709551615";
+	 * sizeof(UINT64_MAX)==21
+	 */
+	char buf21[21];
 
 	snprintf(fn, sizeof(fn), "/tmp/net-%s.conf", dev->name);
 	f = fopen(fn, "w");
@@ -147,6 +153,8 @@ static void dump_device_config(struct netdev *dev)
 				my_inet_ntoa(dev->ip_server));
 		write_option(f, "ROOTPATH", dev->bootpath);
 		write_option(f, "filename", dev->filename);
+		sprintf(buf21, "%ld", (long)dev->uptime);
+		write_option(f, "UPTIME", buf21);
 		fclose(f);
 	}
 }
@@ -180,6 +188,10 @@ static void postprocess_device(struct netdev *dev)
 
 static void complete_device(struct netdev *dev)
 {
+	struct sysinfo info;
+
+	if (!sysinfo(&info))
+		dev->uptime = info.uptime;
 	postprocess_device(dev);
 	configure_device(dev);
 	dump_device_config(dev);
