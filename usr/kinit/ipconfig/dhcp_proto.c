@@ -84,6 +84,7 @@ static int dhcp_parse(struct netdev *dev, struct bootp_hdr *hdr,
 {
 	uint8_t type = 0;
 	uint32_t serverid = INADDR_NONE;
+	uint32_t leasetime = 0;
 	int ret = 0;
 
 	if (extlen >= 4 && exts[0] == 99 && exts[1] == 130 &&
@@ -99,6 +100,8 @@ static int dhcp_parse(struct netdev *dev, struct bootp_hdr *hdr,
 
 			ext += len;
 
+			if (*opt == 51 && len == 4)
+				leasetime = ntohl(*(uint32_t *)(opt + 2));
 			if (*opt == 53)
 				type = opt[2];
 			if (*opt == 54)
@@ -115,6 +118,7 @@ static int dhcp_parse(struct netdev *dev, struct bootp_hdr *hdr,
 		break;
 
 	case DHCPACK:
+		dev->dhcpleasetime = leasetime;
 		ret = bootp_parse(dev, hdr, exts, extlen) ? DHCPACK : 0;
 		dprintf("\n   dhcp ack\n");
 		break;

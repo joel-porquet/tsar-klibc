@@ -155,6 +155,8 @@ static void dump_device_config(struct netdev *dev)
 		write_option(f, "filename", dev->filename);
 		sprintf(buf21, "%ld", (long)dev->uptime);
 		write_option(f, "UPTIME", buf21);
+		sprintf(buf21, "%u", (unsigned int)dev->dhcpleasetime);
+		write_option(f, "DHCPLEASETIME", buf21);
 		fclose(f);
 	}
 }
