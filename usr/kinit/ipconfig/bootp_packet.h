@@ -38,4 +38,7 @@ struct bootp_hdr {
 /* larger size for backward compatibility of ipconfig */
 #define BOOTP_EXTS_SIZE	1500
 
+/* minimum length of BOOTP/DHCP packet on sending */
+#define BOOTP_MIN_LEN	300
+
 #endif /* BOOTP_PACKET_H */
