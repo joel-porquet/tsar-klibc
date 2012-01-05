@@ -144,13 +144,18 @@ static int check_vrf(struct rpc_auth *vrf)
 	return (vrf->flavor == htonl(AUTH_NULL)) ? 0 : -1;
 }
 
+#define MAX_UDP_PACKET	65536
+
 static int dummy_portmap(int sock, FILE *portmap_file)
 {
 	struct sockaddr_in sin;
 	int pktlen, addrlen;
-	unsigned char pkt[65536];	/* Max UDP packet size */
-	/* RPC UDP packets do not include TCP fragment size */
-	struct rpc_call *rpc = (struct rpc_call *) &pkt[-4];
+	union {
+		struct rpc_call rpc;
+		/* Max UDP packet size + unused TCP fragment size */
+		char payload[MAX_UDP_PACKET + offsetof(struct rpc_header, udp)];
+	} pkt;
+	struct rpc_call *rpc = &pkt.rpc;
 	struct rpc_auth *cred;
 	struct rpc_auth *vrf;
 	struct portmap_args *args;
@@ -158,8 +163,8 @@ static int dummy_portmap(int sock, FILE *portmap_file)
 
 	for (;;) {
 		addrlen = sizeof sin;
-		pktlen = recvfrom(sock, &pkt, sizeof pkt, 0,
-				  (struct sockaddr *)&sin, &addrlen);
+		pktlen = recvfrom(sock, &rpc->hdr.udp, MAX_UDP_PACKET,
+				  0, (struct sockaddr *)&sin, &addrlen);
 
 		if (pktlen < 0) {
 			if (errno == EINTR)
@@ -189,9 +194,11 @@ static int dummy_portmap(int sock, FILE *portmap_file)
 		} else if (rpc->prog_vers != htonl(2)) {
 			rply.rpc.reply_state = htonl(PROG_MISMATCH);
 		} else if (!(vrf = get_auth(cred)) ||
-			   (char *)vrf > (char *)pkt + pktlen - 8 - sizeof(*args) ||
+			   (char *)vrf > ((char *)&rpc->hdr.udp + pktlen - 8 -
+					  sizeof(*args)) ||
 			   !(args = get_auth(vrf)) ||
-			   (char *)args > (char *)pkt + pktlen - sizeof(*args) ||
+			   (char *)args > ((char *)&rpc->hdr.udp + pktlen -
+					   sizeof(*args)) ||
 			   check_cred(cred) || check_vrf(vrf)) {
 			/* Can't deal with credentials data; the kernel
 			   won't send them */
