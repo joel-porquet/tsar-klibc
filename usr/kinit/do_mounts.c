@@ -7,6 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <inttypes.h>
+#include <mntent.h>
 
 #include "do_mounts.h"
 #include "kinit.h"
@@ -199,12 +200,120 @@ mount_root(int argc, char *argv[], dev_t root_dev, const char *root_dev_name)
 	return ret;
 }
 
+/* Allocate a buffer and prepend '/root' onto 'src'. */
+static char *prepend_root_dir(const char *src)
+{
+	size_t len = strlen(src) + 6;  /* "/root" */
+	char *p = malloc(len);
+
+	if (!p)
+		return NULL;
+
+	strcpy(p, "/root");
+	strcat(p, src);
+	return p;
+}
+
+int do_cmdline_mounts(int argc, char *argv[])
+{
+	int arg_i;
+
+	for (arg_i = 0; arg_i < argc; arg_i++) {
+		const char *fs_dev, *fs_dir, *fs_type;
+		char *fs_opts;
+		unsigned long flags = 0;
+		char new_fs_opts[128] = { 0 };
+		char *saveptr = NULL;
+		char *fs_opts_savedptr = NULL;
+		int opt_first = 1;
+		const char *opt;
+		char *new_dir;
+
+		if (strncmp(argv[arg_i], "kinit_mount=", 12))
+			continue;
+		/*
+		 * Format:
+		 *   <fs_dev>;<dir>;<fs_type>;[opt1],[optn...]
+		 */
+		fs_dev = strtok_r(&argv[arg_i][12], ";", &saveptr);
+		if (!fs_dev) {
+			fprintf(stderr, "Failed to parse fs_dev\n");
+			continue;
+		}
+		fs_dir = strtok_r(NULL, ";", &saveptr);
+		if (!fs_dir) {
+			fprintf(stderr, "Failed to parse fs_dir\n");
+			continue;
+		}
+		fs_type = strtok_r(NULL, ";", &saveptr);
+		if (!fs_type) {
+			fprintf(stderr, "Failed to parse fs_type\n");
+			continue;
+		}
+		fs_opts = strtok_r(NULL, ";", &saveptr);
+		if (!fs_opts) {
+			fprintf(stderr, "Failed to parse fs_opts\n");
+			continue;
+		}
+
+		/* If 'fs_opts' specifies 'ro' or 'bind', gobble it up. */
+		while ((opt = strtok_r((opt_first ? fs_opts : NULL),
+				       ",", &fs_opts_savedptr))) {
+			if (!strcmp(opt, "ro"))
+				flags |= MS_RDONLY;
+			else if (!strcmp(opt, "bind"))
+				flags |= MS_BIND;
+			else {
+				if (!opt_first)
+					strcat(new_fs_opts, ",");
+				strcat(new_fs_opts, opt);
+			}
+			if (opt_first)
+				opt_first = 0;
+		}
+		new_dir = prepend_root_dir(fs_dir);
+		if (! new_dir)
+			return -ENOMEM;
+
+		if (!mount_block(fs_dev, new_dir, fs_type,
+				 flags, new_fs_opts))
+			fprintf(stderr, "Skipping failed mount '%s'\n", fs_dev);
+
+		free(new_dir);
+	}
+	return 0;
+}
+
+int do_fstab_mounts(FILE *fp)
+{
+	struct mntent *ent = NULL;
+	char *new_dir;
+
+	while ((ent = getmntent(fp))) {
+		new_dir = prepend_root_dir(ent->mnt_dir);
+		if (! new_dir)
+			return -ENOMEM;
+		if (!mount_block(ent->mnt_fsname,
+				 new_dir,
+				 ent->mnt_type,
+				 0,
+				 ent->mnt_opts)) {
+			fprintf(stderr, "Skipping failed mount '%s'\n",
+				ent->mnt_fsname);
+		}
+		free(new_dir);
+	}
+	return 0;
+}
+
 int do_mounts(int argc, char *argv[])
 {
 	const char *root_dev_name = get_arg(argc, argv, "root=");
 	const char *root_delay = get_arg(argc, argv, "rootdelay=");
 	const char *load_ramdisk = get_arg(argc, argv, "load_ramdisk=");
 	dev_t root_dev = 0;
+	int err;
+	FILE *fp;
 
 	dprintf("kinit: do_mounts\n");
 
@@ -241,6 +350,22 @@ int do_mounts(int argc, char *argv[])
 	}
 
 	if (root_dev == Root_MULTI)
-		return mount_roots(argc, argv, root_dev_name);
-	return mount_root(argc, argv, root_dev, root_dev_name);
+		err = mount_roots(argc, argv, root_dev_name);
+	else
+		err = mount_root(argc, argv, root_dev, root_dev_name);
+
+	if (err)
+		return err;
+
+	if ((fp = setmntent("/etc/fstab", "r"))) {
+		err = do_fstab_mounts(fp);
+		fclose(fp);
+	}
+
+	if (err)
+		return err;
+
+	if (get_arg(argc, argv, "kinit_mount="))
+		err = do_cmdline_mounts(argc, argv);
+	return err;
 }
