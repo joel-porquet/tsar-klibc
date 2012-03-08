@@ -21,6 +21,24 @@ int create_dev(const char *name, dev_t dev)
 	return mknod(name, S_IFBLK | 0600, dev);
 }
 
+
+/*
+ * If there is not a block device for the input 'name', try to create one; if
+ * we can't that's okay.
+ */
+static void create_dev_if_not_present(const char *name)
+{
+	struct stat st;
+	dev_t dev;
+
+	if (stat(name, &st) == 0) /* file present; we're done */
+		return;
+	dev = name_to_dev_t(name);
+	if (dev)
+		(void) create_dev(name, dev);
+}
+
+
 /* mount a filesystem, possibly trying a set of different types */
 const char *mount_block(const char *source, const char *target,
 			const char *type, unsigned long flags,
@@ -32,9 +50,15 @@ const char *mount_block(const char *source, const char *target,
 	int fd;
 
 	if (type) {
-		dprintf("kinit: trying to mount %s on %s with type %s\n",
-			source, target, type);
+		dprintf("kinit: trying to mount %s on %s "
+			"with type %s, flags 0x%lx, data '%s'\n",
+			source, target, type, flags, (char *)data);
 		int rv = mount(source, target, type, flags, data);
+
+		if (rv != 0)
+			dprintf("kinit: mount %s on %s failed "
+							"with errno = %d\n",
+				source, target, errno);
 		/* Mount readonly if necessary */
 		if (rv == -1 && errno == EACCES && !(flags & MS_RDONLY))
 			rv = mount(source, target, type, flags | MS_RDONLY,
@@ -274,6 +298,7 @@ int do_cmdline_mounts(int argc, char *argv[])
 		new_dir = prepend_root_dir(fs_dir);
 		if (! new_dir)
 			return -ENOMEM;
+		create_dev_if_not_present(fs_dev);
 
 		if (!mount_block(fs_dev, new_dir, fs_type,
 				 flags, new_fs_opts))
@@ -293,6 +318,7 @@ int do_fstab_mounts(FILE *fp)
 		new_dir = prepend_root_dir(ent->mnt_dir);
 		if (! new_dir)
 			return -ENOMEM;
+		create_dev_if_not_present(ent->mnt_fsname);
 		if (!mount_block(ent->mnt_fsname,
 				 new_dir,
 				 ent->mnt_type,
