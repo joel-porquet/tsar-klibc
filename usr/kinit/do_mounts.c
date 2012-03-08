@@ -14,6 +14,148 @@
 #include "fstype.h"
 #include "zlib.h"
 
+#ifndef MS_RELATIME
+#  define MS_RELATIME	(1<<21)	/* Update atime relative to mtime/ctime. */
+#endif
+
+#ifndef MS_STRICTATIME
+#  define MS_STRICTATIME	(1<<24) /* Always perform atime updates */
+#endif
+
+/*
+ * The following mount option parsing was stolen from
+ *
+ *       usr/utils/mount_opts.c
+ *
+ * and adapted to add some later mount flags.
+ */
+#define ARRAY_SIZE(x)	(sizeof(x) / sizeof(x[0]))
+
+struct mount_opts {
+	const char str[16];
+	unsigned long rwmask;
+	unsigned long rwset;
+	unsigned long rwnoset;
+};
+
+struct extra_opts {
+	char *str;
+	char *end;
+	int used_size;
+	int alloc_size;
+};
+
+/*
+ * These options define the function of "mount(2)".
+ */
+#define MS_TYPE	(MS_REMOUNT|MS_BIND|MS_MOVE)
+
+
+/* These must be in alphabetic order! */
+static const struct mount_opts options[] = {
+	/* name         mask            set             noset           */
+	{"async", MS_SYNCHRONOUS, 0, MS_SYNCHRONOUS},
+	{"atime", MS_NOATIME, 0, MS_NOATIME},
+	{"bind", MS_TYPE, MS_BIND, 0,},
+	{"dev", MS_NODEV, 0, MS_NODEV},
+	{"diratime", MS_NODIRATIME, 0, MS_NODIRATIME},
+	{"dirsync", MS_DIRSYNC, MS_DIRSYNC, 0},
+	{"exec", MS_NOEXEC, 0, MS_NOEXEC},
+	{"move", MS_TYPE, MS_MOVE, 0},
+	{"nodev", MS_NODEV, MS_NODEV, 0},
+	{"noexec", MS_NOEXEC, MS_NOEXEC, 0},
+	{"nosuid", MS_NOSUID, MS_NOSUID, 0},
+	{"recurse", MS_REC, MS_REC, 0},
+	{"relatime", MS_RELATIME, MS_RELATIME, 0},
+	{"remount", MS_TYPE, MS_REMOUNT, 0},
+	{"ro", MS_RDONLY, MS_RDONLY, 0},
+	{"rw", MS_RDONLY, 0, MS_RDONLY},
+	{"strictatime", MS_STRICTATIME, MS_STRICTATIME, 0},
+	{"suid", MS_NOSUID, 0, MS_NOSUID},
+	{"sync", MS_SYNCHRONOUS, MS_SYNCHRONOUS, 0},
+	{"verbose", MS_VERBOSE, MS_VERBOSE, 0},
+};
+
+/*
+ * Append 's' to 'extra->str'.  's' is a mount option that can't be turned into
+ * a flag.  Return 0 on success, -1 on error.
+ */
+static int add_extra_option(struct extra_opts *extra, char *s)
+{
+	int len = strlen(s);
+	int newlen = extra->used_size + len;
+
+	if (extra->str)
+		len++;		/* +1 for ',' */
+
+	if (newlen >= extra->alloc_size) {
+		char *new;
+
+		new = realloc(extra->str, newlen + 1);	/* +1 for NUL */
+		if (!new) {
+			if (extra->str)
+			       free(extra->str);
+			return -1;
+		}
+
+		extra->str = new;
+		extra->end = extra->str + extra->used_size;
+		extra->alloc_size = newlen;
+	}
+
+	if (extra->used_size) {
+		*extra->end = ',';
+		extra->end++;
+	}
+	strcpy(extra->end, s);
+	extra->used_size += len;
+
+	return 0;
+}
+
+/*
+ * Parse the options in 'arg'; put numeric mount flags into 'flags' and
+ * the rest into 'extra'.  Return 0 on success, -1 on error.
+ */
+static int
+parse_mount_options(char *arg, unsigned long *flags, struct extra_opts *extra)
+{
+	char *s;
+
+	while ((s = strsep(&arg, ",")) != NULL) {
+		char *opt = s;
+		unsigned int i;
+		int res;
+		int no = (s[0] == 'n' && s[1] == 'o');
+		int found = 0;
+
+		if (no)
+			s += 2;
+
+		for (i = 0; i < ARRAY_SIZE(options); i++) {
+
+			res = strcmp(s, options[i].str);
+			if (res == 0) {
+				found = 1;
+				*flags &= ~options[i].rwmask;
+				if (no)
+					*flags |= options[i].rwnoset;
+				else
+					*flags |= options[i].rwset;
+				break;
+
+			/* If we're beyond 's' alphabetically, we're done */
+			} else if (res < 0)
+				break;
+		}
+		if (! found)
+			if (add_extra_option(extra, opt) != 0)
+				return -1;
+	}
+
+	return 0;
+}
+
 /* Create the device node "name" */
 int create_dev(const char *name, dev_t dev)
 {
@@ -241,17 +383,15 @@ static char *prepend_root_dir(const char *src)
 int do_cmdline_mounts(int argc, char *argv[])
 {
 	int arg_i;
+	int ret = 0;
 
 	for (arg_i = 0; arg_i < argc; arg_i++) {
 		const char *fs_dev, *fs_dir, *fs_type;
 		char *fs_opts;
 		unsigned long flags = 0;
-		char new_fs_opts[128] = { 0 };
 		char *saveptr = NULL;
-		char *fs_opts_savedptr = NULL;
-		int opt_first = 1;
-		const char *opt;
 		char *new_dir;
+		struct extra_opts extra = { 0, 0, 0, 0 };
 
 		if (strncmp(argv[arg_i], "kinit_mount=", 12))
 			continue;
@@ -275,59 +415,55 @@ int do_cmdline_mounts(int argc, char *argv[])
 			continue;
 		}
 		fs_opts = strtok_r(NULL, ";", &saveptr);
-		if (!fs_opts) {
-			fprintf(stderr, "Failed to parse fs_opts\n");
-			continue;
-		}
+		/* Don't error if there is no option string sent */
 
-		/* If 'fs_opts' specifies 'ro' or 'bind', gobble it up. */
-		while ((opt = strtok_r((opt_first ? fs_opts : NULL),
-				       ",", &fs_opts_savedptr))) {
-			if (!strcmp(opt, "ro"))
-				flags |= MS_RDONLY;
-			else if (!strcmp(opt, "bind"))
-				flags |= MS_BIND;
-			else {
-				if (!opt_first)
-					strcat(new_fs_opts, ",");
-				strcat(new_fs_opts, opt);
-			}
-			if (opt_first)
-				opt_first = 0;
-		}
 		new_dir = prepend_root_dir(fs_dir);
 		if (! new_dir)
 			return -ENOMEM;
 		create_dev_if_not_present(fs_dev);
+		ret = parse_mount_options(fs_opts, &flags, &extra);
+		if (ret != 0)
+			break;
 
 		if (!mount_block(fs_dev, new_dir, fs_type,
-				 flags, new_fs_opts))
+				 flags, extra.str))
 			fprintf(stderr, "Skipping failed mount '%s'\n", fs_dev);
-
 		free(new_dir);
+		if (extra.str)
+			free(extra.str);
 	}
-	return 0;
+	return ret;
 }
 
 int do_fstab_mounts(FILE *fp)
 {
 	struct mntent *ent = NULL;
 	char *new_dir;
+	int ret = 0;
 
 	while ((ent = getmntent(fp))) {
+		unsigned long flags = 0;
+		struct extra_opts extra = { 0, 0, 0, 0 };
+
 		new_dir = prepend_root_dir(ent->mnt_dir);
 		if (! new_dir)
 			return -ENOMEM;
 		create_dev_if_not_present(ent->mnt_fsname);
+		ret = parse_mount_options(ent->mnt_opts, &flags, &extra);
+		if (ret != 0)
+			break;
+
 		if (!mount_block(ent->mnt_fsname,
 				 new_dir,
 				 ent->mnt_type,
-				 0,
-				 ent->mnt_opts)) {
+				 flags,
+				 extra.str)) {
 			fprintf(stderr, "Skipping failed mount '%s'\n",
 				ent->mnt_fsname);
 		}
 		free(new_dir);
+		if (extra.str)
+			free(extra.str);
 	}
 	return 0;
 }
