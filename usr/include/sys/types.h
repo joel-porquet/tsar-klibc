@@ -89,16 +89,17 @@ typedef uint16_t u_int16_t;
 typedef uint32_t u_int32_t;
 typedef uint64_t u_int64_t;
 
-typedef uint16_t __bitwise __le16;
-typedef uint16_t __bitwise __be16;
-typedef uint32_t __bitwise __le32;
-typedef uint32_t __bitwise __be32;
-typedef uint64_t __bitwise __le64;
-typedef uint64_t __bitwise __be64;
+typedef __u16 __bitwise __le16;
+typedef __u16 __bitwise __be16;
+typedef __u32 __bitwise __le32;
+typedef __u32 __bitwise __be32;
+typedef __u64 __bitwise __le64;
+typedef __u64 __bitwise __be64;
 
-typedef uint16_t __sum16;
-typedef uint32_t __sum32;
-typedef uint64_t __sum64;
+typedef __u16 __bitwise __sum16;
+typedef __u32 __bitwise __sum32;
+typedef __u64 __bitwise __sum64;
+typedef __u32 __bitwise __wsum;
 
 #define __aligned_u64 __u64 __attribute__((aligned(8)))
 #define __aligned_be64 __be64 __attribute__((aligned(8)))
