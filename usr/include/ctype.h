@@ -47,6 +47,20 @@ __extern int tolower(int);
 
 extern const unsigned char __ctypes[];
 
+__must_inline int __ctype_isalnum(int);
+__must_inline int __ctype_isalpha(int);
+__must_inline int __ctype_isascii(int);
+__must_inline int __ctype_isblank(int);
+__must_inline int __ctype_iscntrl(int);
+__must_inline int __ctype_isdigit(int);
+__must_inline int __ctype_isgraph(int);
+__must_inline int __ctype_islower(int);
+__must_inline int __ctype_isprint(int);
+__must_inline int __ctype_ispunct(int);
+__must_inline int __ctype_isspace(int);
+__must_inline int __ctype_isupper(int);
+__must_inline int __ctype_isxdigit(int);
+
 __must_inline int __ctype_isalnum(int __c)
 {
 	return __ctypes[__c + 1] &
@@ -117,6 +131,9 @@ __must_inline int __ctype_isxdigit(int __c)
 /* Note: this is decimal, not hex, to avoid accidental promotion to unsigned */
 #define _toupper(__c) ((__c) & ~32)
 #define _tolower(__c) ((__c) | 32)
+
+__must_inline int __ctype_toupper(int);
+__must_inline int __ctype_tolower(int);
 
 __must_inline int __ctype_toupper(int __c)
 {
