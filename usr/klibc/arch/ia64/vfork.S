@@ -8,7 +8,6 @@
 /* This syscall is a special case of the clone syscall */
 #include <asm/unistd.h>
 #include <asm/signal.h>
-#include <klibc/archsys.h>
 
 /* These are redefined here because linux/sched.h isn't safe for
  * inclusion in asm.
