@@ -284,8 +284,6 @@ int main(int argc, char *argv[])
 	check_path("/root");
 	do_mounts(cmdc, cmdv);
 
-	drop_capabilities(get_arg(cmdc, cmdv, "drop_capabilities="));
-
 	if (mnt_procfs) {
 		umount2("/proc", 0);
 		mnt_procfs = 0;
@@ -305,7 +303,9 @@ int main(int argc, char *argv[])
 
 	init_argv[0] = strrchr(init_path, '/') + 1;
 
-	errmsg = run_init("/root", "/dev/console", init_path, init_argv);
+	errmsg = run_init("/root", "/dev/console",
+			  get_arg(cmdc, cmdv, "drop_capabilities="),
+			  init_path, init_argv);
 
 	/* If run_init returned, something went bad */
 	fprintf(stderr, "%s: %s: %s\n", progname, errmsg, strerror(errno));

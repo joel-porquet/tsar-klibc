@@ -26,13 +26,14 @@
  * ----------------------------------------------------------------------- */
 
 /*
- * Usage: exec run-init [-c /dev/console] /real-root /sbin/init "$@"
+ * Usage: exec run-init [-d caps] [-c /dev/console] /real-root /sbin/init "$@"
  *
  * This program should be called as the last thing in a shell script
  * acting as /init in an initramfs; it does the following:
  *
  * - Delete all files in the initramfs;
  * - Remounts /real-root onto the root filesystem;
+ * - Drops comma-separated list of capabilities;
  * - Chroots;
  * - Opens /dev/console;
  * - Spawns the specified init program (with arguments.)
@@ -50,7 +51,7 @@ static const char *program;
 static void __attribute__ ((noreturn)) usage(void)
 {
 	fprintf(stderr,
-		"Usage: exec %s [-c consoledev] /real-root /sbin/init [args]\n",
+		"Usage: exec %s [-d caps] [-c consoledev] /real-root /sbin/init [args]\n",
 		program);
 	exit(1);
 }
@@ -62,6 +63,7 @@ int main(int argc, char *argv[])
 	const char *realroot;
 	const char *init;
 	const char *error;
+	const char *drop_caps = NULL;
 	char **initargs;
 
 	/* Variables... */
@@ -70,9 +72,11 @@ int main(int argc, char *argv[])
 	/* Parse the command line */
 	program = argv[0];
 
-	while ((o = getopt(argc, argv, "c:")) != -1) {
+	while ((o = getopt(argc, argv, "c:d:")) != -1) {
 		if (o == 'c') {
 			console = optarg;
+		} else if (o == 'd') {
+			drop_caps = optarg;
 		} else {
 			usage();
 		}
@@ -85,7 +89,7 @@ int main(int argc, char *argv[])
 	init = argv[optind + 1];
 	initargs = argv + optind + 1;
 
-	error = run_init(realroot, console, init, initargs);
+	error = run_init(realroot, console, drop_caps, init, initargs);
 
 	/* If run_init returns, something went wrong */
 	fprintf(stderr, "%s: %s: %s\n", program, error, strerror(errno));

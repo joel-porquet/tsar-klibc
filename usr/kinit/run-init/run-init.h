@@ -29,6 +29,6 @@
 #define RUN_INIT_H
 
 const char *run_init(const char *realroot, const char *console,
-		     const char *init, char **initargs);
+		     const char *drop_caps, const char *init, char **initargs);
 
 #endif

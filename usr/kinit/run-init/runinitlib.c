@@ -26,7 +26,7 @@
  * ----------------------------------------------------------------------- */
 
 /*
- * run_init(consoledev, realroot, init, initargs)
+ * run_init(realroot, consoledev, drop_caps, init, initargs)
  *
  * This function should be called as the last thing in kinit,
  * from initramfs, it does the following:
@@ -34,6 +34,7 @@
  * - Delete all files in the initramfs;
  * - Remounts /real-root onto the root filesystem;
  * - Chroots;
+ * - Drops comma-separated list of capabilities;
  * - Opens /dev/console;
  * - Spawns the specified init program (with arguments.)
  *
@@ -53,6 +54,7 @@
 #include <sys/types.h>
 #include <sys/vfs.h>
 #include "run-init.h"
+#include "capabilities.h"
 
 /* Make it possible to compile on glibc by including constants that the
    always-behind shipped glibc headers may not include.  Classic example
@@ -154,7 +156,8 @@ static int nuke(const char *what)
 }
 
 const char *run_init(const char *realroot, const char *console,
-		     const char *init, char **initargs)
+		     const char *drop_caps, const char *init,
+		     char **initargs)
 {
 	struct stat rst, cst;
 	struct statfs sfs;
@@ -194,6 +197,10 @@ const char *run_init(const char *realroot, const char *console,
 	/* chroot, chdir */
 	if (chroot(".") || chdir("/"))
 		return "chroot";
+
+	/* Drop capabilities */
+	if (drop_capabilities(drop_caps) < 0)
+		return "dropping capabilities";
 
 	/* Open /dev/console */
 	if ((confd = open(console, O_RDWR)) < 0)

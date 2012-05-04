@@ -18,9 +18,14 @@ lib-y := $(objs)
 # personality(2) flag from getting set and passed to init).
 EXTRA_KLIBCLDFLAGS += -z noexecstack
 
+# Additional include paths files
+KLIBCCFLAGS += -I$(srctree)/$(src)/..
+
 # .o files used to built executables
-static/run-init-y := $(objs)
-shared/run-init-y := $(objs)
+static/run-init-y   := $(objs)
+static/run-init-lib := ../lib.a
+shared/run-init-y   := $(objs)
+shared/run-init-lib := ../lib.a
 
 # Cleaning
 clean-dirs := static shared
