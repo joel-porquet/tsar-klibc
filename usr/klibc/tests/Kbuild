@@ -39,6 +39,7 @@ sig-nodefer.shared-y	:= sig-nodefer.o
 socket.shared-y		:= socket.o
 stat.shared-y		:= stat.o
 statfs.shared-y		:= statfs.o
+stdio.shared-y		:= stdio.o
 strlcpycat.shared-y	:= strlcpycat.o
 strtoimax.shared-y	:= strtoimax.o
 strtotime.shared-y	:= strtotime.o
