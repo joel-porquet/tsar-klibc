@@ -15,33 +15,36 @@ struct _IO_file __stdio_headnode =
 	.next = &__stdio_headnode,
 };
 
-/* This depends on O_RDONLY == 0, O_WRONLY == 1, O_RDWR == 2 */
 int __parse_open_mode(const char *mode)
 {
-	int plus = 0;
-	int flags = O_RDONLY;
+	int rwflags = O_RDONLY;
+	int crflags = 0;
+	int eflag   = 0;
 
 	while (*mode) {
 		switch (*mode++) {
 		case 'r':
-			flags = O_RDONLY;
+			rwflags = O_RDONLY;
+			crflags = 0;
 			break;
 		case 'w':
-			flags = O_WRONLY | O_CREAT | O_TRUNC;
+			rwflags = O_WRONLY;
+			crflags = O_CREAT | O_TRUNC;
 			break;
 		case 'a':
-			flags = O_WRONLY | O_CREAT | O_APPEND;
+			rwflags = O_WRONLY;
+			crflags = O_CREAT | O_APPEND;
+			break;
+		case 'e':
+			eflag = O_CLOEXEC;
 			break;
 		case '+':
-			plus = 1;
+			rwflags = O_RDWR;
 			break;
 		}
 	}
 
-	if (plus)
-		flags = (flags & ~(O_RDONLY | O_WRONLY)) | O_RDWR;
-
-	return flags;
+	return rwflags | crflags | eflag;
 }
 
 FILE *__fxopen(int fd, int flags, int close_on_err)
