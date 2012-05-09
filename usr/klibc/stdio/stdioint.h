@@ -30,7 +30,6 @@ struct _IO_file {
 
 __extern int __parse_open_mode(const char *mode);
 __extern FILE *__fxopen(int fd, int flags, int close_on_err);
-__extern int __fputc(int c, FILE *f);
 
 __extern struct _IO_file __stdio_headnode;
 
