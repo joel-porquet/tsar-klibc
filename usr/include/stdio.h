@@ -11,17 +11,7 @@
 #include <stddef.h>
 #include <unistd.h>
 
-/* Actual FILE structure */
-struct _IO_file {
-	struct _IO_file *prev, *next;
-	off_t filepos;		/* File position */
-	char *buf;		/* Buffer */
-	char *data;		/* Data in buffer */
-	int bytes;		/* Data bytes in buffer */
-	int bufsiz;		/* Total size of buffer */
-	int fd;			/* Underlying file descriptor */
-	int flags;		/* Error, end of file */
-};
+struct _IO_file;
 typedef struct _IO_file FILE;
 
 enum _IO_file_flags {
@@ -48,24 +38,14 @@ enum _IO_file_flags {
 /*
  * Convert between a FILE * and a file descriptor.
  */
-__extern int fileno(FILE *);
-
-__extern_inline int fileno(FILE * __f)
-{
-	return __f->fd;
-}
-
 __extern FILE *stdin, *stdout, *stderr;
 
+__extern int fileno(FILE *);
 __extern FILE *fopen(const char *, const char *);
 __extern FILE *fdopen(int, const char *);
 __extern int fclose(FILE *);
 __extern int fseek(FILE *, off_t, int);
-__static_inline off_t ftell(FILE * __f)
-{
-	return __f->filepos;
-}
-
+__extern off_t ftell(FILE * __f);
 __extern int fputs(const char *, FILE *);
 __extern int puts(const char *);
 __extern int fputc(int, FILE *);

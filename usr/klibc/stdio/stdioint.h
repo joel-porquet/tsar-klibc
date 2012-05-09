@@ -13,6 +13,18 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+/* Actual FILE structure */
+struct _IO_file {
+	struct _IO_file *prev, *next;
+	off_t filepos;		/* File position */
+	char *buf;		/* Buffer */
+	char *data;		/* Data in buffer */
+	int bytes;		/* Data bytes in buffer */
+	int bufsiz;		/* Total size of buffer */
+	int fd;			/* Underlying file descriptor */
+	int flags;		/* Error, end of file */
+};
+
 /* Assign this much extra to the input buffer in case of ungetc() */
 #define _IO_UNGET_SLOP	32
 
