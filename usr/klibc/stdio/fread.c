@@ -18,8 +18,8 @@ size_t _fread(void *buf, size_t count, FILE *f)
 		nb = f->bytes;
 		nb = (count < nb) ? count : nb;
 		if (nb) {
-			memcpy(p, f->buf+f->offset, nb);
-			f->offset += nb;
+			memcpy(p, f->data, nb);
+			f->data += nb;
 			f->bytes  -= nb;
 			p += nb;
 			count -= nb;
@@ -33,9 +33,9 @@ size_t _fread(void *buf, size_t count, FILE *f)
 			break;	/* Done... */
 
 		/* If we get here, f->ibuf must be empty */
-		f->offset = _IO_UNGET_SLOP;
+		f->data = f->buf + _IO_UNGET_SLOP;
 
-		rv = read(f->fd, f->buf+_IO_UNGET_SLOP, BUFSIZ);
+		rv = read(f->fd, f->data, BUFSIZ);
 		if (rv == -1) {
 			if (errno == EINTR || errno == EAGAIN)
 				continue;

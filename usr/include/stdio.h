@@ -11,17 +11,12 @@
 #include <stddef.h>
 #include <unistd.h>
 
-/* Unidirectional buffer */
-struct _IO_buf {
-	char *buf;		/* Actual buffer */
-};
-
 /* Actual FILE structure */
 struct _IO_file {
 	struct _IO_file *prev, *next;
 	off_t filepos;		/* File position */
 	char *buf;		/* Buffer */
-	int offset;		/* Offset to data in buffer */
+	char *data;		/* Data in buffer */
 	int bytes;		/* Data bytes in buffer */
 	int bufsiz;		/* Total size of buffer */
 	int fd;			/* Underlying file descriptor */

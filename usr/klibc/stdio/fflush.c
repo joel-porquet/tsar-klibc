@@ -38,7 +38,7 @@ int fflush(FILE *f)
 		p += rv;
 		f->bytes -= rv;
 	}
-	f->offset = _IO_UNGET_SLOP;
+	f->data = f->buf + _IO_UNGET_SLOP;
 	f->flags &= ~_IO_FILE_FLAG_WRITE;
 
 	return 0;

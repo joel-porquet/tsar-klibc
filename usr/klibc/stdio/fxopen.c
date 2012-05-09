@@ -60,8 +60,8 @@ FILE *__fxopen(int fd, int flags, int close_on_err)
 		goto err;
 
 	f->bufsiz = BUFSIZ;
-	f->offset = _IO_UNGET_SLOP;
-	f->bytes = 0;		/* No bytes in buffer */
+	f->data = f->buf + _IO_UNGET_SLOP;
+	f->bytes = 0;		/* No data in buffer */
 	f->flags = isatty(fd) ? _IO_FILE_FLAG_LINE_BUF : 0;
 
 	/* Insert into linked list */
