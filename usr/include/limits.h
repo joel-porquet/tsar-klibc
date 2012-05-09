@@ -5,7 +5,7 @@
 #ifndef _LIMITS_H
 #define _LIMITS_H
 
-#define OPEN_MAX        20
+#define OPEN_MAX        256
 
 #define CHAR_BIT	8
 #define SHRT_BIT	16
