@@ -1,6 +1,7 @@
+#define __NO_STDIO_INLINES
 #include "stdioint.h"
 
-int feof(FILE *f)
+int feof(FILE *__f)
 {
-	return !!(f->flags & _IO_FILE_FLAG_EOF);
+	return __f->_io_eof;
 }

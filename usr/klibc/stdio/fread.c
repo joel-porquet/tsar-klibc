@@ -6,8 +6,9 @@
 #include <string.h>
 #include "stdioint.h"
 
-size_t _fread(void *buf, size_t count, FILE *f)
+size_t _fread(void *buf, size_t count, FILE *file)
 {
+	struct _IO_file_pvt *f = stdio_pvt(file);
 	size_t bytes = 0;
 	size_t nb;
 	char *p = buf;
@@ -18,11 +19,11 @@ size_t _fread(void *buf, size_t count, FILE *f)
 	if (!count)
 		return 0;
 
-	if (f->flags & _IO_FILE_FLAG_WRITE)
-		fflush(f);
+	if (f->obytes)		/* User error! */
+		__fflush(f);
 
 	while (count) {
-		while (f->bytes == 0) {
+		while (f->ibytes == 0) {
 			/*
 			 * The buffer is empty, we have to read
 			 */
@@ -36,14 +37,14 @@ size_t _fread(void *buf, size_t count, FILE *f)
 				nb = f->bufsiz;
 			}
 
-			rv = read(f->fd, rdptr, nb);
+			rv = read(f->pub._io_fileno, rdptr, nb);
 			if (rv == -1) {
 				if (errno == EINTR || errno == EAGAIN)
 					continue;
-				f->flags |= _IO_FILE_FLAG_ERR;
+				f->pub._io_error = true;
 				return bytes;
 			} else if (rv == 0) {
-				f->flags |= _IO_FILE_FLAG_EOF;
+				f->pub._io_eof = true;
 				return bytes;
 
 
@@ -53,11 +54,10 @@ size_t _fread(void *buf, size_t count, FILE *f)
 				p += rv;
 				bytes += rv;
 				count -= rv;
-				f->filepos += rv;
+				f->pub._io_filepos += rv;
 			} else {
-				f->bytes = rv;
+				f->ibytes = rv;
 				f->data = rdptr;
-				f->flags |= _IO_FILE_FLAG_READ;
 			}
 
 			if (!count)
@@ -65,7 +65,7 @@ size_t _fread(void *buf, size_t count, FILE *f)
 		}
 
 		/* If we get here, the buffer is non-empty */
-		nb = f->bytes;
+		nb = f->ibytes;
 		nb = (count < nb) ? count : nb;
 		if (nb) {
 			memcpy(p, f->data, nb);
@@ -73,10 +73,8 @@ size_t _fread(void *buf, size_t count, FILE *f)
 			bytes += nb;
 			count -= nb;
 			f->data += nb;
-			f->bytes -= nb;
-			f->filepos += nb;
-			if (!f->bytes)
-				f->flags &= ~_IO_FILE_FLAG_READ;
+			f->ibytes -= nb;
+			f->pub._io_filepos += nb;
 		}
 	}
 	return bytes;

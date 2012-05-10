@@ -27,7 +27,7 @@ klib-y := vsnprintf.o snprintf.o vsprintf.o sprintf.o \
 	  siglongjmp.o \
 	  sigaction.o sigpending.o sigprocmask.o sigsuspend.o \
 	  pselect.o ppoll.o \
-	  brk.o sbrk.o malloc.o realloc.o calloc.o \
+	  brk.o sbrk.o malloc.o realloc.o zalloc.o calloc.o \
 	  mmap.o shm_open.o shm_unlink.o \
 	  memcpy.o memcmp.o memset.o memccpy.o memmem.o memswap.o \
 	  memmove.o memchr.o memrchr.o bzero.o \
@@ -58,7 +58,8 @@ klib-y := vsnprintf.o snprintf.o vsprintf.o sprintf.o \
 	  userdb/getgrgid.o userdb/getgrnam.o userdb/getpwnam.o \
 	  userdb/getpwuid.o userdb/root_group.o userdb/root_user.o \
 	  setmntent.o endmntent.o getmntent.o \
-	  stdio/fclose.o stdio/fopen.o stdio/fdopen.o stdio/fxopen.o \
+	  stdio/fclose.o stdio/fopen.o stdio/fdopen.o \
+	  stdio/openmode.o stdio/fxopen.o \
 	  stdio/fread.o stdio/fwrite.o stdio/fflush.o \
 	  stdio/fseek.o stdio/ftell.o stdio/fileno.o \
 	  stdio/ungetc.o stdio/feof.o stdio/ferror.o

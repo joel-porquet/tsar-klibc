@@ -9,21 +9,24 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
 
 /* Actual FILE structure */
-struct _IO_file {
-	struct _IO_file *prev, *next;
-	off_t filepos;		/* File position */
+struct _IO_file_pvt {
+	struct _IO_file pub;	/* Data exported to inlines */
+	struct _IO_file_pvt *prev, *next;
 	char *buf;		/* Buffer */
-	char *data;		/* Data in buffer */
-	int bytes;		/* Data bytes in buffer */
+	char *data;		/* Location of input data in buffer */
+	int ibytes;		/* Input data bytes in buffer */
+	int obytes;		/* Output data bytes in buffer */
 	int bufsiz;		/* Total size of buffer */
-	int fd;			/* Underlying file descriptor */
-	int flags;		/* Error, end of file */
+	enum _IO_bufmode bufmode; /* Type of buffering */
 };
+
+#define stdio_pvt(x) container_of(x, struct _IO_file_pvt, pub)
 
 enum _IO_file_flags {
 	_IO_FILE_FLAG_WRITE	=  1, /* Buffer has write data */
@@ -37,9 +40,10 @@ enum _IO_file_flags {
 /* Assign this much extra to the input buffer in case of ungetc() */
 #define _IO_UNGET_SLOP	32
 
+__extern int __fflush(struct _IO_file_pvt *);
 __extern int __parse_open_mode(const char *mode);
-__extern FILE *__fxopen(int fd, int flags, int close_on_err);
+__extern FILE *__fxopen(int fd, int flags, bool close_on_err);
 
-__extern struct _IO_file __stdio_headnode;
+__extern struct _IO_file_pvt __stdio_headnode;
 
 #endif /* USR_KLIBC_STDIO_STDIOINT_H */

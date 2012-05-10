@@ -4,13 +4,14 @@
 
 #include "stdioint.h"
 
-int ungetc(int c, FILE *f)
+int ungetc(int c, FILE *file)
 {
-	if (f->flags & _IO_FILE_FLAG_WRITE || f->data <= f->buf)
+	struct _IO_file_pvt *f = stdio_pvt(file);
+
+	if (f->obytes || f->data <= f->buf)
 		return EOF;
 
 	*(--f->data) = c;
-	f->bytes++;
-	f->flags |= _IO_FILE_FLAG_READ;
+	f->ibytes++;
 	return c;
 }

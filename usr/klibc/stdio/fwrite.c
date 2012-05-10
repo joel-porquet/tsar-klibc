@@ -5,7 +5,8 @@
 #include <string.h>
 #include "stdioint.h"
 
-static size_t fwrite_noflush(const void *buf, size_t count, FILE *f)
+static size_t fwrite_noflush(const void *buf, size_t count,
+			     struct _IO_file_pvt *f)
 {
 	size_t bytes = 0;
 	size_t nb;
@@ -13,53 +14,53 @@ static size_t fwrite_noflush(const void *buf, size_t count, FILE *f)
 	ssize_t rv;
 
 	while (count) {
-		if (f->bytes == 0 && count >= f->bufsiz) {
+		if (f->obytes == 0 && count >= f->bufsiz) {
 			/*
 			 * The buffer is empty and the write is large,
 			 * so bypass the buffering entirely.
 			 */
-			rv = write(f->fd, p, count);
+			rv = write(f->pub._io_fileno, p, count);
 			if (rv == -1) {
 				if (errno == EINTR || errno == EAGAIN)
 					continue;
-				f->flags |= _IO_FILE_FLAG_ERR;
+				f->pub._io_error = true;
 				break;
 			} else if (rv == 0) {
 				/* EOF on output? */
-				f->flags |= _IO_FILE_FLAG_EOF;
+				f->pub._io_eof = true;
 				break;
 			}
 
 			p += rv;
 			bytes += rv;
 			count -= rv;
-			f->filepos += rv;
+			f->pub._io_filepos += rv;
 		} else {
-			nb = f->bufsiz - f->bytes;
+			nb = f->bufsiz - f->obytes;
 			nb = (count < nb) ? count : nb;
 			if (nb) {
-				memcpy(f->buf+f->bytes, p, nb);
+				memcpy(f->buf+f->obytes, p, nb);
 				p += nb;
-				f->bytes += nb;
+				f->obytes += nb;
 				count -= nb;
 				bytes += nb;
-				f->filepos += nb;
-				f->flags |= _IO_FILE_FLAG_WRITE;
+				f->pub._io_filepos += nb;
 			}
 
 			if (!count)
 				break;	/* Done... */
 
 			/* If we get here, the buffer must be full */
-			if (fflush(f))
+			if (__fflush(f))
 				break;
 		}
 	}
 	return bytes;
 }
 
-size_t _fwrite(const void *buf, size_t count, FILE *f)
+size_t _fwrite(const void *buf, size_t count, FILE *file)
 {
+	struct _IO_file_pvt *f = stdio_pvt(file);
 	size_t bytes = 0;
 	size_t pf_len, pu_len;
 	const char *p = buf;
@@ -68,10 +69,13 @@ size_t _fwrite(const void *buf, size_t count, FILE *f)
 	   and unflushed (pu) depending on buffering mode
 	   and contents. */
 
-	if (f->flags & _IO_FILE_FLAG_UNBUF) {
+	switch (f->bufmode) {
+	case _IONBF:
 		pf_len = 0;
 		pu_len = count;
-	} else if (f->flags & _IO_FILE_FLAG_LINE_BUF) {
+		break;
+
+	case _IOLBF:
 		pf_len = count;
 		pu_len = 0;
 
@@ -79,15 +83,19 @@ size_t _fwrite(const void *buf, size_t count, FILE *f)
 			pf_len--;
 			pu_len++;
 		}
-	} else {
+		break;
+
+	case _IOFBF:
+	default:
 		pf_len = 0;
 		pu_len = count;
+		break;
 	}
 
 	if (pf_len) {
 		bytes = fwrite_noflush(p, pf_len, f);
 		p += bytes;
-		if (fflush(f) || bytes != pf_len)
+		if (__fflush(f) || bytes != pf_len)
 			return bytes;
 	}
 

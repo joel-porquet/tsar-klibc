@@ -4,17 +4,25 @@
 
 #include "stdioint.h"
 
-__extern int fseek(FILE *f, off_t where, int whence)
+__extern int fseek(FILE *file, off_t where, int whence)
 {
+	struct _IO_file_pvt *f = stdio_pvt(file);
 	off_t rv;
 
-	fflush(f);
+	if (f->obytes)
+		__fflush(f);
 
-	rv = lseek(f->fd, where, whence);
+	if (whence == SEEK_CUR) {
+		where += f->pub._io_filepos;
+		whence = SEEK_SET;
+	}
+
+	rv = lseek(f->pub._io_fileno, where, whence);
 	if (rv != -1) {
-		f->filepos = rv;
-		f->bytes = 0;
-		f->flags &= ~_IO_FILE_FLAG_READ;
+		f->pub._io_filepos = rv;
+		f->ibytes = 0;
+		f->obytes = 0;
+		f->data = f->buf + _IO_UNGET_SLOP;
 		return 0;
 	} else {
 		return -1;

@@ -1,6 +1,7 @@
+#define __NO_STDIO_INLINES
 #include "stdioint.h"
 
-int fileno(FILE *f)
+int fileno(FILE *__f)
 {
-	return f->fd;
+	return __f->_io_fileno;
 }

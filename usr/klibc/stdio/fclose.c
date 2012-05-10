@@ -4,20 +4,19 @@
 
 #include "stdioint.h"
 
-int fclose(FILE *f)
+int fclose(FILE *file)
 {
+	struct _IO_file_pvt *f = stdio_pvt(file);
 	int rv;
 
-	fflush(f);
+	fflush(file);
 
-	rv = close(f->fd);
+	rv = close(f->pub._io_fileno);
 
 	/* Remove from linked list */
 	f->next->prev = f->prev;
 	f->prev->next = f->next;
 
-	free(f->buf);
 	free(f);
-
 	return rv;
 }

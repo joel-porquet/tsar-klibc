@@ -9,63 +9,29 @@
 FILE *stdin, *stdout, *stderr;
 
 /* Doubly-linked list of all stdio structures */
-struct _IO_file __stdio_headnode =
+struct _IO_file_pvt __stdio_headnode =
 {
 	.prev = &__stdio_headnode,
 	.next = &__stdio_headnode,
 };
 
-int __parse_open_mode(const char *mode)
+FILE *__fxopen(int fd, int flags, bool close_on_err)
 {
-	int rwflags = O_RDONLY;
-	int crflags = 0;
-	int eflag   = 0;
+	struct _IO_file_pvt *f;
+	const size_t bufoffs =
+		(sizeof *f + 4*sizeof(void *) - 1) &
+		~(4*sizeof(void *) - 1);
 
-	while (*mode) {
-		switch (*mode++) {
-		case 'r':
-			rwflags = O_RDONLY;
-			crflags = 0;
-			break;
-		case 'w':
-			rwflags = O_WRONLY;
-			crflags = O_CREAT | O_TRUNC;
-			break;
-		case 'a':
-			rwflags = O_WRONLY;
-			crflags = O_CREAT | O_APPEND;
-			break;
-		case 'e':
-			eflag = O_CLOEXEC;
-			break;
-		case '+':
-			rwflags = O_RDWR;
-			break;
-		}
-	}
-
-	return rwflags | crflags | eflag;
-}
-
-FILE *__fxopen(int fd, int flags, int close_on_err)
-{
-	FILE *f = NULL;
-
-	f = malloc(sizeof *f);
+	f = zalloc(bufoffs + BUFSIZ + _IO_UNGET_SLOP);
 	if (!f)
 		goto err;
 
-	f->fd = fd;
-	f->filepos = lseek(fd, 0, SEEK_CUR);
-
-	f->buf = malloc(BUFSIZ + _IO_UNGET_SLOP);
-	if (!f->buf)
-		goto err;
-
+	f->data = f->buf = (char *)f + bufoffs;
+	f->pub._io_fileno = fd;
+	f->pub._io_filepos = lseek(fd, 0, SEEK_CUR);
 	f->bufsiz = BUFSIZ;
 	f->data = f->buf + _IO_UNGET_SLOP;
-	f->bytes = 0;		/* No data in buffer */
-	f->flags = isatty(fd) ? _IO_FILE_FLAG_LINE_BUF : 0;
+	f->bufmode = isatty(fd) ? _IOLBF : _IONBF;
 
 	/* Insert into linked list */
 	f->prev = &__stdio_headnode;
@@ -73,13 +39,11 @@ FILE *__fxopen(int fd, int flags, int close_on_err)
 	f->next->prev = f;
 	__stdio_headnode.next = f;
 
-	return f;
+	return &f->pub;
 
 err:
-	if (f) {
-		free(f->buf);
+	if (f)
 		free(f);
-	}
 	if (close_on_err)
 		close(fd);
 	errno = ENOMEM;
@@ -89,11 +53,11 @@ err:
 void __init_stdio(void)
 {
 	stdin  = __fxopen(0, O_RDONLY, 0);
-	stdin->flags = _IO_FILE_FLAG_LINE_BUF;
+	stdio_pvt(stdin)->bufmode = _IOLBF;
 
 	stdout = __fxopen(1, O_WRONLY|O_TRUNC, 0);
-	stdout->flags = _IO_FILE_FLAG_LINE_BUF;
+	stdio_pvt(stdout)->bufmode = _IOLBF;
 
 	stderr = __fxopen(2, O_WRONLY|O_TRUNC, 0);
-	stderr->flags = _IO_FILE_FLAG_UNBUF;
+	stdio_pvt(stderr)->bufmode = _IONBF;
 }
