@@ -14,15 +14,6 @@
 struct _IO_file;
 typedef struct _IO_file FILE;
 
-enum _IO_file_flags {
-	_IO_FILE_FLAG_WRITE	=  1, /* Buffer has write data */
-	_IO_FILE_FLAG_READ	=  2, /* Buffer has read data */
-	_IO_FILE_FLAG_LINE_BUF  =  4, /* Line buffered */
-	_IO_FILE_FLAG_UNBUF     =  8, /* Unbuffered */
-	_IO_FILE_FLAG_EOF	= 16,
-	_IO_FILE_FLAG_ERR	= 32,
-};
-
 #ifndef EOF
 # define EOF (-1)
 #endif
