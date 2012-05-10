@@ -31,7 +31,7 @@ FILE *__fxopen(int fd, int flags, bool close_on_err)
 	f->pub._io_filepos = lseek(fd, 0, SEEK_CUR);
 	f->bufsiz = BUFSIZ;
 	f->data = f->buf + _IO_UNGET_SLOP;
-	f->bufmode = isatty(fd) ? _IOLBF : _IONBF;
+	f->bufmode = isatty(fd) ? _IOLBF : _IOFBF;
 
 	/* Insert into linked list */
 	f->prev = &__stdio_headnode;

@@ -70,7 +70,7 @@ size_t _fwrite(const void *buf, size_t count, FILE *file)
 	   and contents. */
 
 	switch (f->bufmode) {
-	case _IONBF:
+	case _IOFBF:
 		pf_len = 0;
 		pu_len = count;
 		break;
@@ -85,7 +85,7 @@ size_t _fwrite(const void *buf, size_t count, FILE *file)
 		}
 		break;
 
-	case _IOFBF:
+	case _IONBF:
 	default:
 		pf_len = 0;
 		pu_len = count;
