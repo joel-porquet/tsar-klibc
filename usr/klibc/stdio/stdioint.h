@@ -20,9 +20,9 @@ struct _IO_file_pvt {
 	struct _IO_file_pvt *prev, *next;
 	char *buf;		/* Buffer */
 	char *data;		/* Location of input data in buffer */
-	int ibytes;		/* Input data bytes in buffer */
-	int obytes;		/* Output data bytes in buffer */
-	int bufsiz;		/* Total size of buffer */
+	unsigned int ibytes;	/* Input data bytes in buffer */
+	unsigned int obytes;	/* Output data bytes in buffer */
+	unsigned int bufsiz;	/* Total size of buffer */
 	enum _IO_bufmode bufmode; /* Type of buffering */
 };
 
