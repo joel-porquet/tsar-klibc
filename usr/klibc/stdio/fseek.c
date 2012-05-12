@@ -21,10 +21,12 @@ __extern int fseek(FILE *file, off_t where, int whence)
 	rv = lseek(f->pub._io_fileno, where, whence);
 	if (__likely(rv != (off_t)-1)) {
 		f->pub._io_filepos = rv;
+		f->pub._io_eof = false;
 		f->ibytes = 0;
 		f->obytes = 0;
 		return 0;
 	} else {
+		f->pub._io_error = true;
 		return -1;
 	}
 }
