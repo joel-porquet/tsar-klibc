@@ -9,8 +9,9 @@ int __fflush(struct _IO_file_pvt *f)
 	ssize_t rv;
 	char *p;
 
-	if (!f->obytes)
-		return 0;
+	/* Flush any unused input data */
+	f->pub._io_filepos -= f->ibytes;
+	f->ibytes = 0;
 
 	p = f->buf;
 	while (f->obytes) {
