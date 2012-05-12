@@ -8,13 +8,8 @@
 
 int isatty(int fd)
 {
-	int old_errno = errno;
-	int istty;
-	pid_t dummy;
+	int dummy;
 
 	/* All ttys support TIOCGPGRP */
-	istty = !ioctl(fd, TIOCGPGRP, &dummy);
-	errno = old_errno;
-
-	return istty;
+	return !ioctl(fd, TIOCGPGRP, &dummy);
 }
