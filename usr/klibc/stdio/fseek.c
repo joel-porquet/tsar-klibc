@@ -10,7 +10,8 @@ __extern int fseek(FILE *file, off_t where, int whence)
 	off_t rv;
 
 	if (f->obytes)
-		__fflush(f);
+		if (__fflush(f))
+			return -1;
 
 	if (whence == SEEK_CUR) {
 		where += f->pub._io_filepos;
@@ -18,11 +19,10 @@ __extern int fseek(FILE *file, off_t where, int whence)
 	}
 
 	rv = lseek(f->pub._io_fileno, where, whence);
-	if (rv != -1) {
+	if (__likely(rv != (off_t)-1)) {
 		f->pub._io_filepos = rv;
 		f->ibytes = 0;
 		f->obytes = 0;
-		f->data = f->buf + _IO_UNGET_SLOP;
 		return 0;
 	} else {
 		return -1;
