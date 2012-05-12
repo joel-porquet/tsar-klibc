@@ -10,7 +10,7 @@ int __parse_open_mode(const char *mode)
 {
 	int rwflags = O_RDONLY;
 	int crflags = 0;
-	int eflag   = 0;
+	int eflags  = 0;
 
 	while (*mode) {
 		switch (*mode++) {
@@ -27,7 +27,10 @@ int __parse_open_mode(const char *mode)
 			crflags = O_CREAT | O_APPEND;
 			break;
 		case 'e':
-			eflag = O_CLOEXEC;
+			eflags |= O_CLOEXEC;
+			break;
+		case 'x':
+			eflags |= O_EXCL;
 			break;
 		case '+':
 			rwflags = O_RDWR;
@@ -35,5 +38,5 @@ int __parse_open_mode(const char *mode)
 		}
 	}
 
-	return rwflags | crflags | eflag;
+	return rwflags | crflags | eflags;
 }
