@@ -30,7 +30,6 @@ FILE *__fxopen(int fd, int flags, bool close_on_err)
 	f->pub._io_fileno = fd;
 	f->pub._io_filepos = lseek(fd, 0, SEEK_CUR);
 	f->bufsiz = BUFSIZ;
-	f->data = f->buf + _IO_UNGET_SLOP;
 	f->bufmode = isatty(fd) ? _IOLBF : _IOFBF;
 
 	/* Insert into linked list */
