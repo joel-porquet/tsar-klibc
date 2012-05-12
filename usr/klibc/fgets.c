@@ -16,8 +16,8 @@ char *fgets(char *s, int n, FILE *f)
 	while (n > 1) {
 		ch = getc(f);
 		if (ch == EOF) {
-			*p = '\0';
-			return NULL;
+			s = NULL;
+			break;
 		}
 		*p++ = ch;
 		n--;
