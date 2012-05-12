@@ -49,6 +49,7 @@ __extern FILE *fopen(const char *, const char *);
 __extern FILE *fdopen(int, const char *);
 __extern int fclose(FILE *);
 __extern int fseek(FILE *, off_t, int);
+__extern void rewind(FILE *);
 __extern int fputs(const char *, FILE *);
 __extern int puts(const char *);
 __extern int fputc(int, FILE *);
