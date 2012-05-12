@@ -9,9 +9,12 @@ int __fflush(struct _IO_file_pvt *f)
 	ssize_t rv;
 	char *p;
 
-	/* Flush any unused input data */
-	f->pub._io_filepos -= f->ibytes;
-	f->ibytes = 0;
+	/*
+	 * Flush any unused input data.  If there is input data, there
+	 * won't be any output data.
+	 */
+	if (__unlikely(f->ibytes))
+		return fseek(&f->pub, 0, SEEK_CUR);
 
 	p = f->buf;
 	while (f->obytes) {

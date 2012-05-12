@@ -14,6 +14,10 @@ static size_t fwrite_noflush(const void *buf, size_t count,
 	ssize_t rv;
 
 	while (count) {
+		if (f->ibytes || f->obytes >= f->bufsiz)
+			if (__fflush(f))
+				break;
+
 		if (f->obytes == 0 && count >= f->bufsiz) {
 			/*
 			 * The buffer is empty and the write is large,
@@ -46,13 +50,6 @@ static size_t fwrite_noflush(const void *buf, size_t count,
 				bytes += nb;
 				f->pub._io_filepos += nb;
 			}
-
-			if (!count)
-				break;	/* Done... */
-
-			/* If we get here, the buffer must be full */
-			if (__fflush(f))
-				break;
 		}
 	}
 	return bytes;
