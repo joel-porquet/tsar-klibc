@@ -1,9 +1,5 @@
 /*
  * fgets.c
- *
- * This will be very slow due to the implementation of getc(),
- * but we don't have anywhere to put characters we don't need from
- * the input.
  */
 
 #include <stdio.h>
