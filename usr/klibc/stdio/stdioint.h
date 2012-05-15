@@ -41,8 +41,6 @@ enum _IO_file_flags {
 #define _IO_UNGET_SLOP	32
 
 __extern int __fflush(struct _IO_file_pvt *);
-__extern int __parse_open_mode(const char *mode);
-__extern FILE *__fxopen(int fd, int flags, bool close_on_err);
 
 __extern struct _IO_file_pvt __stdio_headnode;
 

@@ -1,20 +1,62 @@
 /*
  * fdopen.c
+ *
+ * Common code between fopen(), fdopen() and the standard descriptors.
  */
 
 #include "stdioint.h"
 
+FILE *stdin, *stdout, *stderr;
+
+/* Doubly-linked list of all stdio structures */
+struct _IO_file_pvt __stdio_headnode =
+{
+	.prev = &__stdio_headnode,
+	.next = &__stdio_headnode,
+};
+
 FILE *fdopen(int fd, const char *mode)
 {
-	int flags = __parse_open_mode(mode);
-	int oldflags;
+	struct _IO_file_pvt *f;
+	const size_t bufoffs =
+		(sizeof *f + 4*sizeof(void *) - 1) &
+		~(4*sizeof(void *) - 1);
 
-	if (fcntl(fd, F_GETFL, &oldflags))
-		return NULL;
+	(void)mode;
 
-	oldflags = (oldflags & ~O_APPEND) | (flags & O_APPEND);
-	if (fcntl(fd, F_SETFL, &oldflags))
-		return NULL;
+	f = zalloc(bufoffs + BUFSIZ + _IO_UNGET_SLOP);
+	if (!f)
+		goto err;
 
-	return __fxopen(fd, flags, 0);
+	f->data = f->buf = (char *)f + bufoffs;
+	f->pub._io_fileno = fd;
+	f->pub._io_filepos = lseek(fd, 0, SEEK_CUR);
+	f->bufsiz = BUFSIZ;
+	f->bufmode = isatty(fd) ? _IOLBF : _IOFBF;
+
+	/* Insert into linked list */
+	f->prev = &__stdio_headnode;
+	f->next = __stdio_headnode.next;
+	f->next->prev = f;
+	__stdio_headnode.next = f;
+
+	return &f->pub;
+
+err:
+	if (f)
+		free(f);
+	errno = ENOMEM;
+	return NULL;
+}
+
+void __init_stdio(void)
+{
+	stdin  = fdopen(0, NULL);
+	stdio_pvt(stdin)->bufmode = _IOLBF;
+
+	stdout = fdopen(1, NULL);
+	stdio_pvt(stdout)->bufmode = _IOLBF;
+
+	stderr = fdopen(2, NULL);
+	stdio_pvt(stderr)->bufmode = _IONBF;
 }

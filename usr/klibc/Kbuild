@@ -67,7 +67,6 @@ klib-y += vsnprintf.o snprintf.o vsprintf.o sprintf.o \
 	  userdb/getpwuid.o userdb/root_group.o userdb/root_user.o \
 	  setmntent.o endmntent.o getmntent.o \
 	  stdio/fclose.o stdio/fopen.o stdio/fdopen.o \
-	  stdio/openmode.o stdio/fxopen.o \
 	  stdio/fread.o stdio/fwrite.o stdio/fflush.o \
 	  stdio/ungetc.o stdio/fgetc.o \
 	  stdio/fseek.o stdio/ftell.o stdio/rewind.o \
