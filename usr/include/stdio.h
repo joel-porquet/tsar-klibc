@@ -49,6 +49,7 @@ __extern FILE *fopen(const char *, const char *);
 __extern FILE *fdopen(int, const char *);
 __extern int fclose(FILE *);
 __extern int fseek(FILE *, off_t, int);
+#define fseeko fseek
 __extern void rewind(FILE *);
 __extern int fputs(const char *, FILE *);
 __extern int puts(const char *);
@@ -93,6 +94,7 @@ __extern size_t fread(void *, size_t, size_t, FILE *);
 __extern size_t fwrite(const void *, size_t, size_t, FILE *);
 
 __extern off_t ftell(FILE *__f);
+#define ftello ftell
 
 __extern int ferror(FILE * );
 __extern int feof(FILE *);
