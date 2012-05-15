@@ -5,6 +5,7 @@
 #ifndef _DIRENT_H
 #define _DIRENT_H
 
+#include <klibc/compiler.h>
 #include <klibc/extern.h>
 #include <klibc/sysconfig.h>
 #include <sys/dirent.h>
@@ -23,10 +24,11 @@ struct _IO_dir {
 };
 typedef struct _IO_dir DIR;
 
+__extern DIR *fdopendir(int);
 __extern DIR *opendir(const char *);
 __extern struct dirent *readdir(DIR *);
 __extern int closedir(DIR *);
-static __inline__ int dirfd(DIR * __d)
+__static_inline int dirfd(DIR * __d)
 {
 	return __d->__fd;
 }

@@ -5,26 +5,37 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #define __KLIBC_DIRENT_INTERNALS
 #include <dirent.h>
 
-DIR *opendir(const char *name)
+DIR *fdopendir(int fd)
 {
-	DIR *dp = malloc(sizeof(DIR));
+	DIR *dp = zalloc(sizeof(DIR));
 
 	if (!dp)
 		return NULL;
 
-	dp->__fd = open(name, O_DIRECTORY | O_RDONLY);
+	dp->__fd = fd;
+	return dp;
+}
 
-	if (dp->__fd < 0) {
-		free(dp);
+DIR *opendir(const char *name)
+{
+	int fd, err;
+	DIR *dp;
+
+	fd = open(name, O_DIRECTORY | O_RDONLY);
+	if (fd < 0)
 		return NULL;
+
+	dp = fdopendir(fd);
+	if (!dp) {
+		err = errno;
+		close(fd);
+		errno = err;
 	}
-
-	dp->bytes_left = 0;
-
 	return dp;
 }
 
