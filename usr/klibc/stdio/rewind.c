@@ -4,5 +4,5 @@
 void rewind(FILE *f)
 {
 	if (!fseek(f, 0, SEEK_SET))
-		f->_io_error = false;
+		f->_IO_error = false;
 }

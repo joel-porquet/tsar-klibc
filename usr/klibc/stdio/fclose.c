@@ -11,7 +11,7 @@ int fclose(FILE *file)
 
 	fflush(file);
 
-	rv = close(f->pub._io_fileno);
+	rv = close(f->pub._IO_fileno);
 
 	/* Remove from linked list */
 	f->next->prev = f->prev;

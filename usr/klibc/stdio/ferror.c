@@ -3,5 +3,5 @@
 
 int ferror(FILE *__f)
 {
-	return __f->_io_error;
+	return __f->_IO_error;
 }

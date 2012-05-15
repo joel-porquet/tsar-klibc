@@ -30,9 +30,9 @@ FILE *fdopen(int fd, const char *mode)
 		goto err;
 
 	f->data = f->buf = (char *)f + bufoffs;
-	f->pub._io_fileno = fd;
+	f->pub._IO_fileno = fd;
 	pos = lseek(fd, 0, SEEK_CUR);
-	f->pub._io_filepos = (pos >= 0) ? pos : 0;
+	f->pub._IO_filepos = (pos >= 0) ? pos : 0;
 	f->bufsiz = BUFSIZ;
 	f->bufmode = isatty(fd) ? _IOLBF : _IOFBF;
 

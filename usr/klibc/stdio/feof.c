@@ -3,5 +3,5 @@
 
 int feof(FILE *__f)
 {
-	return __f->_io_eof;
+	return __f->_IO_eof;
 }

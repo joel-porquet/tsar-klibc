@@ -3,5 +3,5 @@
 
 int fileno(FILE *__f)
 {
-	return __f->_io_fileno;
+	return __f->_IO_fileno;
 }

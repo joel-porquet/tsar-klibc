@@ -37,14 +37,14 @@ size_t _fread(void *buf, size_t count, FILE *file)
 				nb = f->bufsiz;
 			}
 
-			rv = read(f->pub._io_fileno, rdptr, nb);
+			rv = read(f->pub._IO_fileno, rdptr, nb);
 			if (rv == -1) {
 				if (errno == EINTR || errno == EAGAIN)
 					continue;
-				f->pub._io_error = true;
+				f->pub._IO_error = true;
 				return bytes;
 			} else if (rv == 0) {
-				f->pub._io_eof = true;
+				f->pub._IO_eof = true;
 				return bytes;
 
 
@@ -54,7 +54,7 @@ size_t _fread(void *buf, size_t count, FILE *file)
 				p += rv;
 				bytes += rv;
 				count -= rv;
-				f->pub._io_filepos += rv;
+				f->pub._IO_filepos += rv;
 			} else {
 				f->ibytes = rv;
 				f->data = rdptr;
@@ -74,7 +74,7 @@ size_t _fread(void *buf, size_t count, FILE *file)
 			count -= nb;
 			f->data += nb;
 			f->ibytes -= nb;
-			f->pub._io_filepos += nb;
+			f->pub._IO_filepos += nb;
 		}
 	}
 	return bytes;

@@ -3,5 +3,5 @@
 
 off_t ftell(FILE *f)
 {
-	return f->_io_filepos;
+	return f->_IO_filepos;
 }

@@ -23,22 +23,22 @@ static size_t fwrite_noflush(const void *buf, size_t count,
 			 * The buffer is empty and the write is large,
 			 * so bypass the buffering entirely.
 			 */
-			rv = write(f->pub._io_fileno, p, count);
+			rv = write(f->pub._IO_fileno, p, count);
 			if (rv == -1) {
 				if (errno == EINTR || errno == EAGAIN)
 					continue;
-				f->pub._io_error = true;
+				f->pub._IO_error = true;
 				break;
 			} else if (rv == 0) {
 				/* EOF on output? */
-				f->pub._io_eof = true;
+				f->pub._IO_eof = true;
 				break;
 			}
 
 			p += rv;
 			bytes += rv;
 			count -= rv;
-			f->pub._io_filepos += rv;
+			f->pub._IO_filepos += rv;
 		} else {
 			nb = f->bufsiz - f->obytes;
 			nb = (count < nb) ? count : nb;
@@ -48,7 +48,7 @@ static size_t fwrite_noflush(const void *buf, size_t count,
 				f->obytes += nb;
 				count -= nb;
 				bytes += nb;
-				f->pub._io_filepos += nb;
+				f->pub._IO_filepos += nb;
 			}
 		}
 	}

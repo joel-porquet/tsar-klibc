@@ -14,19 +14,19 @@ __extern int fseek(FILE *file, off_t where, int whence)
 			return -1;
 
 	if (whence == SEEK_CUR) {
-		where += f->pub._io_filepos;
+		where += f->pub._IO_filepos;
 		whence = SEEK_SET;
 	}
 
-	rv = lseek(f->pub._io_fileno, where, whence);
+	rv = lseek(f->pub._IO_fileno, where, whence);
 	if (__likely(rv != (off_t)-1)) {
-		f->pub._io_filepos = rv;
-		f->pub._io_eof = false;
+		f->pub._IO_filepos = rv;
+		f->pub._IO_eof = false;
 		f->ibytes = 0;
 		f->obytes = 0;
 		return 0;
 	} else {
-		f->pub._io_error = true;
+		f->pub._IO_error = true;
 		return -1;
 	}
 }

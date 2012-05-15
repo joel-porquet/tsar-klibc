@@ -12,10 +12,10 @@
 #include <unistd.h>
 
 struct _IO_file {
-	off_t _io_filepos;	/* File position */
-	int _io_fileno;		/* Underlying file descriptor */
-	_Bool _io_eof;		/* End of file flag */
-	_Bool _io_error;	/* Error flag */
+	off_t _IO_filepos;	/* File position */
+	int _IO_fileno;		/* Underlying file descriptor */
+	_Bool _IO_eof;		/* End of file flag */
+	_Bool _IO_error;	/* Error flag */
 };
 typedef struct _IO_file FILE;
 
@@ -113,28 +113,28 @@ fwrite(const void *__p, size_t __s, size_t __n, FILE * __f)
 
 __extern_inline off_t ftell(FILE *__f)
 {
-	return __f->_io_filepos;
+	return __f->_IO_filepos;
 }
 
 __extern_inline int fileno(FILE *__f)
 {
-	return __f->_io_fileno;
+	return __f->_IO_fileno;
 }
 
 __extern_inline int ferror(FILE *__f)
 {
-	return __f->_io_error;
+	return __f->_IO_error;
 }
 
 __extern_inline int feof(FILE *__f)
 {
-	return __f->_io_eof;
+	return __f->_IO_eof;
 }
 
 __extern_inline void clearerr(FILE *__f)
 {
-	__f->_io_error = 0;
-	__f->_io_eof = 0;
+	__f->_IO_error = 0;
+	__f->_IO_eof = 0;
 }
 #endif
 

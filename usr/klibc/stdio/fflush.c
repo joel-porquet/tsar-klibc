@@ -18,15 +18,15 @@ int __fflush(struct _IO_file_pvt *f)
 
 	p = f->buf;
 	while (f->obytes) {
-		rv = write(f->pub._io_fileno, p, f->obytes);
+		rv = write(f->pub._IO_fileno, p, f->obytes);
 		if (rv == -1) {
 			if (errno == EINTR || errno == EAGAIN)
 				continue;
-			f->pub._io_error = true;
+			f->pub._IO_error = true;
 			return EOF;
 		} else if (rv == 0) {
 			/* EOF on output? */
-			f->pub._io_eof = true;
+			f->pub._IO_eof = true;
 			return EOF;
 		}
 
