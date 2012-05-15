@@ -47,9 +47,12 @@ int fflush(FILE *file)
 	} else {
 		int err = 0;
 
-		for (f = __stdio_headnode.next; f != &__stdio_headnode;
-		     f = f->next)
-			err |= __fflush(f);
+		for (f = __stdio_headnode.next;
+		     f != &__stdio_headnode;
+		     f = f->next) {
+			if (f->obytes)
+				err |= __fflush(f);
+		}
 		return err;
 	}
 }
