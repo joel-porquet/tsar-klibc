@@ -14,7 +14,7 @@
  * Set in SYSCALLS whether or not we should use an unadorned mmap() system
  * call (typical on 64-bit architectures).
  */
-#if !_KLIBC_NO_MMU && _KLIBC_USE_MMAP2
+#if _KLIBC_USE_MMAP2
 
 /* This architecture uses mmap2(). The Linux mmap2() system call takes
    a page offset as the offset argument.  We need to make sure we have
