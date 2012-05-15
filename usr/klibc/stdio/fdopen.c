@@ -21,6 +21,7 @@ FILE *fdopen(int fd, const char *mode)
 	const size_t bufoffs =
 		(sizeof *f + 4*sizeof(void *) - 1) &
 		~(4*sizeof(void *) - 1);
+	off_t pos;
 
 	(void)mode;
 
@@ -30,7 +31,8 @@ FILE *fdopen(int fd, const char *mode)
 
 	f->data = f->buf = (char *)f + bufoffs;
 	f->pub._io_fileno = fd;
-	f->pub._io_filepos = lseek(fd, 0, SEEK_CUR);
+	pos = lseek(fd, 0, SEEK_CUR);
+	f->pub._io_filepos = (pos >= 0) ? pos : 0;
 	f->bufsiz = BUFSIZ;
 	f->bufmode = isatty(fd) ? _IOLBF : _IOFBF;
 
