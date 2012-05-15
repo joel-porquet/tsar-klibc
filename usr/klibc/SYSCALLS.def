@@ -206,9 +206,19 @@ int rt_sigprocmask::__rt_sigprocmask(int, const sigset_t *, sigset_t *, size_t);
 <sparc64> void rt_sigreturn::__sigreturn();
 #else
 int sigaction::__sigaction(int, const struct sigaction *, struct sigaction *);
-int sigsuspend(const sigset_t *);
 int sigpending(sigset_t *);
 int sigprocmask(int, const sigset_t *, sigset_t *);
+/*
+ * There is no single calling convention for the old sigsuspend.
+ * If your architecture is not listed here, building klibc shall
+ * rather fail than use a broken calling convention.
+ * You better switch to RT signals on those architectures:
+ * blackfin h8300 microblaze mips.
+ *
+ * The arguments other than the sigset_t are assumed ignored.
+ */
+<cris,sh,sparc,alpha,powerpc,sparc64> int sigsuspend::__sigsuspend_s(sigset_t);
+<arm,frv,i386,m68k,mn10300,s390> int sigsuspend::__sigsuspend_xxs(int, int, sigset_t);
 #endif
 int kill(pid_t, int);
 <?> unsigned int alarm(unsigned int);
