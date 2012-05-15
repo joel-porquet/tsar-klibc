@@ -5,7 +5,16 @@
 # Tell that we are building klibc
 export klibc-build := y
 
-klib-y := vsnprintf.o snprintf.o vsprintf.o sprintf.o \
+# Generate syscall stubs
+klib-y += syscalls/
+# Generate socket calls stubs
+klib-y += socketcalls/
+# zlib, if configured
+klib-$(CONFIG_KLIBC_ZLIB) += zlib/
+# arch specific .o files
+klib-y += arch/$(KLIBCARCHDIR)/
+
+klib-y += vsnprintf.o snprintf.o vsprintf.o sprintf.o \
 	  asprintf.o vasprintf.o \
 	  vsscanf.o sscanf.o ctypes.o \
 	  strntoumax.o strntoimax.o \
@@ -70,10 +79,6 @@ ifeq ($(CONFIG_KLIBC_ERRLIST),y)
 KLIBCCFLAGS_strerror.o += -DWITH_ERRLIST
 endif
 
-klib-$(CONFIG_KLIBC_ZLIB) += zlib/
-# arch specific .o files
-klib-y += arch/$(KLIBCARCHDIR)/
-
 #####
 # Shared definitions
 LIBC     := libc.a
@@ -90,11 +95,6 @@ CRT0     := $(call objectify,$(CRT0))
 INTERP_O := $(call objectify,$(INTERP_O))
 
 SOLIBHASH = $(shell cat $(SOLIB).hash)
-
-# Generate syscall stubs
-klib-y += syscalls/
-# Generate socket calls stubs
-klib-y += socketcalls/
 
 #####
 # Readable errormessages extracted from src..
