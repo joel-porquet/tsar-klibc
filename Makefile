@@ -135,7 +135,7 @@ help:
 	@echo	'make V=0|1 [targets] 0 => quiet build (default), 1 => verbose build'
 	@echo
 	@echo	'Sample invocation:'
-	@echo	'make  KLIBCKERNELSRC=`pwd`/../linux'
+	@echo	'make  KLIBCKERNELSRC=`pwd`/../linux/usr/'
 
 ###
 # allow one to say make dir/file.o
