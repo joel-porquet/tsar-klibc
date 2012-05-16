@@ -20,7 +20,6 @@ __extern int fseek(FILE *file, off_t where, int whence)
 	if (__likely(rv != (off_t)-1)) {
 		f->pub._IO_eof = false;
 		f->ibytes = 0;
-		f->obytes = 0;
 		return 0;
 	} else {
 		f->pub._IO_error = true;
