@@ -17,7 +17,7 @@ __extern int fseek(FILE *file, off_t where, int whence)
 		where -= f->ibytes;
 
 	rv = lseek(f->pub._IO_fileno, where, whence);
-	if (__likely(rv != (off_t)-1)) {
+	if (__likely(rv >= 0)) {
 		f->pub._IO_eof = false;
 		f->ibytes = 0;
 		return 0;
