@@ -51,11 +51,7 @@ err:
 void __init_stdio(void)
 {
 	stdin  = fdopen(0, NULL);
-	stdio_pvt(stdin)->bufmode = _IOLBF;
-
 	stdout = fdopen(1, NULL);
-	stdio_pvt(stdout)->bufmode = _IOLBF;
-
 	stderr = fdopen(2, NULL);
 	stdio_pvt(stderr)->bufmode = _IONBF;
 }
