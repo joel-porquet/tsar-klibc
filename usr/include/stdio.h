@@ -12,7 +12,6 @@
 #include <unistd.h>
 
 struct _IO_file {
-	off_t _IO_filepos;	/* File position */
 	int _IO_fileno;		/* Underlying file descriptor */
 	_Bool _IO_eof;		/* End of file flag */
 	_Bool _IO_error;	/* Error flag */
@@ -111,11 +110,6 @@ __extern_inline size_t
 fwrite(const void *__p, size_t __s, size_t __n, FILE * __f)
 {
 	return _fwrite(__p, __s * __n, __f) / __s;
-}
-
-__extern_inline off_t ftell(FILE *__f)
-{
-	return __f->_IO_filepos;
 }
 
 __extern_inline int fileno(FILE *__f)

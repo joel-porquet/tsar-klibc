@@ -1,7 +1,12 @@
-#define __NO_STDIO_INLINES
 #include "stdioint.h"
 
-off_t ftell(FILE *f)
+off_t ftell(FILE *file)
 {
-	return f->_IO_filepos;
+	struct _IO_file_pvt *f = stdio_pvt(file);
+	off_t pos = lseek(f->pub._IO_fileno, 0, SEEK_CUR);
+
+	if (pos >= 0)
+		pos += (int)f->obytes - (int)f->ibytes;
+
+	return pos;
 }

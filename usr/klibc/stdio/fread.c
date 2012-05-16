@@ -54,7 +54,6 @@ size_t _fread(void *buf, size_t count, FILE *file)
 				p += rv;
 				bytes += rv;
 				count -= rv;
-				f->pub._IO_filepos += rv;
 			} else {
 				f->ibytes = rv;
 				f->data = rdptr;
@@ -74,7 +73,6 @@ size_t _fread(void *buf, size_t count, FILE *file)
 			count -= nb;
 			f->data += nb;
 			f->ibytes -= nb;
-			f->pub._IO_filepos += nb;
 		}
 	}
 	return bytes;

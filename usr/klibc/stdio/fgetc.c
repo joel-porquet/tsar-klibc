@@ -11,7 +11,6 @@ int fgetc(FILE *file)
 
 	if (__likely(f->ibytes)) {
 		f->ibytes--;
-		f->pub._IO_filepos++;
 		return (unsigned char) *f->data++;
 	} else {
 		return _fread(&ch, 1, file) == 1 ? ch : EOF;

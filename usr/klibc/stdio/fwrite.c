@@ -38,7 +38,6 @@ static size_t fwrite_noflush(const void *buf, size_t count,
 			p += rv;
 			bytes += rv;
 			count -= rv;
-			f->pub._IO_filepos += rv;
 		} else {
 			nb = f->bufsiz - f->obytes;
 			nb = (count < nb) ? count : nb;
@@ -48,7 +47,6 @@ static size_t fwrite_noflush(const void *buf, size_t count,
 				f->obytes += nb;
 				count -= nb;
 				bytes += nb;
-				f->pub._IO_filepos += nb;
 			}
 		}
 	}
