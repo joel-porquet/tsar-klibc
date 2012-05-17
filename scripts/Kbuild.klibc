@@ -381,7 +381,7 @@ $(sort $(subdir-y) $(kprog-dirs) $(klib-dirs)): $(lib-target)
 # Add FORCE to the prequisites of a target to force it to be always rebuilt.
 # ---------------------------------------------------------------------------
 
-.PHONY: FORCE
+PHONY += FORCE
 
 FORCE:
 
