@@ -18,4 +18,7 @@
 /* MIPS has nonstandard socket definitions */
 #define _KLIBC_HAS_ARCHSOCKET_H 1
 
+/* We can use RT signals on MIPS */
+#define _KLIBC_USE_RT_SIG 1
+
 #endif				/* _KLIBC_ARCHCONFIG_H */
