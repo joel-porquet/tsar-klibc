@@ -82,8 +82,8 @@ size_t _fwrite(const void *buf, size_t count, FILE *file)
 
 	case _IONBF:
 	default:
-		pf_len = 0;
-		pu_len = count;
+		pf_len = count;
+		pu_len = 0;
 		break;
 	}
 
