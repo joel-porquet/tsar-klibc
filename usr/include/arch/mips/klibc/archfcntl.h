@@ -31,6 +31,7 @@
 #define O_DIRECTORY	0x10000
 #define O_NOFOLLOW	0x20000
 #define O_NOATIME	0x40000
+#define O_CLOEXEC	0x80000
 
 #define O_NDELAY	O_NONBLOCK
 
