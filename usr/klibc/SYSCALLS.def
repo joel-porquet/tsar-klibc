@@ -218,7 +218,7 @@ int sigprocmask(int, const sigset_t *, sigset_t *);
  * The arguments other than the sigset_t are assumed ignored.
  */
 <cris,sh,sparc,alpha,ppc,sparc64> int sigsuspend::__sigsuspend_s(sigset_t);
-<arm,frv,i386,m68k,mn10300,s390> int sigsuspend::__sigsuspend_xxs(int, int, sigset_t);
+<arm,frv,i386,m68k,mn10300,s390,s390x> int sigsuspend::__sigsuspend_xxs(int, int, sigset_t);
 #endif
 int kill(pid_t, int);
 <?> unsigned int alarm(unsigned int);
