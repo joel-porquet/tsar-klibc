@@ -21,6 +21,7 @@ getoptlong.shared-y	:= getoptlong.o
 getpagesize.shared-y	:= getpagesize.o
 hello.shared-y		:= hello.o
 idtest.shared-y		:= idtest.o
+lseek.shared-y		:= lseek.o
 malloctest.shared-y	:= malloctest.o
 malloctest2.shared-y	:= malloctest2.o
 memstrtest.shared-y	:= memstrtest.o
