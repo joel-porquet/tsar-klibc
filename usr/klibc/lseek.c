@@ -1,5 +1,5 @@
 /*
- * llseek.c
+ * lseek.c
  *
  * On 32-bit platforms, we need to use the _llseek() system call
  * rather than lseek(), to be able to handle large disks.  _llseek()
