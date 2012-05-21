@@ -165,6 +165,7 @@ int close(int);
 <32> int _llseek::__llseek(int, unsigned long, unsigned long, off_t *, int);
 int dup(int);
 int dup2(int, int);
+int dup3(int, int, int);
 <i386> int fcntl64@varadic::fcntl(int, int, unsigned long);
 <ppc64> int fcntl(int, int, unsigned long);
 <!i386,ppc64> int fcntl64,fcntl::fcntl(int, int, unsigned long);

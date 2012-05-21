@@ -103,6 +103,7 @@ __extern ssize_t pwrite(int, const void *, size_t, off_t);
 
 __extern int dup(int);
 __extern int dup2(int, int);
+__extern int dup3(int, int, int);
 __extern int fcntl(int, int, ...);
 __extern int ioctl(int, int, void *);
 __extern int ftruncate(int, off_t);
