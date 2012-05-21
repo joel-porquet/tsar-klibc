@@ -157,6 +157,7 @@ int getcwd::__getcwd(char *, size_t);
 <!i386,m68k,64> int open::__open(const char *, int, mode_t);
 <?!i386,m68k,64> int openat::__openat(int, const char *, int, mode_t);
 <64> int open(const char *, int, mode_t);
+<64> int openat(int, const char *, int, mode_t);
 ssize_t read(int, void *, size_t);
 ssize_t write(int, const void *, size_t);
 int close(int);
