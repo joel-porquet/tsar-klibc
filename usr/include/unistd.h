@@ -71,6 +71,7 @@ __extern int mkdir(const char *, mode_t);
 __extern int mkdirat(int, const char *, const char *, mode_t);
 __extern int rmdir(const char *);
 __extern int pipe(int *);
+__extern int pipe2(int *, int);
 __extern int chroot(const char *);
 __extern int symlink(const char *, const char *);
 __extern int symlinkat(int, const char *, const char *);
