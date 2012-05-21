@@ -7,6 +7,7 @@
 
 #include <klibc/extern.h>
 #include <klibc/compiler.h>
+#include <klibc/seek.h>
 #include <sys/types.h>
 #if defined(__mips__) && !defined(__mips64__)
 # include <klibc/archfcntl.h>

@@ -7,6 +7,7 @@
 
 #include <klibc/extern.h>
 #include <klibc/sysconfig.h>
+#include <klibc/seek.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <unistd.h>
@@ -25,10 +26,6 @@ typedef struct _IO_file FILE;
 #ifndef BUFSIZ
 # define BUFSIZ _KLIBC_BUFSIZ
 #endif
-
-#define SEEK_SET 0
-#define SEEK_CUR 1
-#define SEEK_END 2
 
 enum _IO_bufmode {
 	_IONBF,

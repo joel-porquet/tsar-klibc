@@ -7,6 +7,7 @@
 
 #include <klibc/extern.h>
 #include <klibc/compiler.h>
+#include <klibc/seek.h>
 #include <stddef.h>
 #include <sys/types.h>
 #include <sys/select.h>
