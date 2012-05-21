@@ -136,7 +136,7 @@ while ( defined($a = shift(@ARGV)) ) {
 	} else {
 	    die "$0: unknown option: $a\n";
 	}
-    } elsif ( $a =~ /^(-print|-dump|--help|--version)/ ) {
+    } elsif ( $a =~ /^(-print|-dump|--help|--version|-v)/ ) {
 	# These share prefixes with some other options, so put this test early!
 	# Pseudo-operations; just pass to gcc and don't do anything else
 	push(@ccopt, $a);
