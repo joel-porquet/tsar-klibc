@@ -18,13 +18,14 @@ extern int __llseek(int fd, unsigned long hi, unsigned long lo, off_t * res,
 
 off_t lseek(int fd, off_t offset, int whence)
 {
+	unsigned long long ullo = offset;
 	off_t result;
 	int rv;
 
-	rv = __llseek(fd, (unsigned long)(offset >> 32), (unsigned long)offset,
+	rv = __llseek(fd, (unsigned long)(ullo >> 32), (unsigned long)ullo,
 		      &result, whence);
 
-	return rv ? (off_t) - 1 : result;
+	return rv ? (off_t)-1 : result;
 }
 
 #endif
