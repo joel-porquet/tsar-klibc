@@ -147,6 +147,9 @@
 #define SHN_COMMON      0xfff2
 #define SHN_HIRESERVE   0xffff
 
+/* End of a chain.  */
+#define STN_UNDEF	0
+
 /* Lenght of magic at the start of a file */
 #define EI_NIDENT	16
 
