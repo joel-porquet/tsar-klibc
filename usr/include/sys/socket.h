@@ -32,6 +32,9 @@
 # define SOCK_NONBLOCK  04000
 #endif
 
+/* The maximum backlock queue length. */
+#define SOMAXCONN	128
+
 #ifndef AF_INET
 #define AF_UNSPEC	0
 #define AF_UNIX		1	/* Unix domain sockets 		*/
