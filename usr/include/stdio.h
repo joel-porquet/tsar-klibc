@@ -95,6 +95,7 @@ __extern off_t ftell(FILE *__f);
 __extern int ferror(FILE * );
 __extern int feof(FILE *);
 __extern int fileno(FILE *);
+__extern void clearerr(FILE *);
 
 #ifndef __NO_STDIO_INLINES
 __extern_inline size_t
