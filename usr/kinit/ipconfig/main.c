@@ -147,8 +147,9 @@ static void dump_device_config(struct netdev *dev)
 	 * sizeof(UINT64_MAX)==21
 	 */
 	char buf21[21];
+	const char path[] = "/run/";
 
-	snprintf(fn, sizeof(fn), "/tmp/net-%s.conf", dev->name);
+	snprintf(fn, sizeof(fn), "%snet-%s.conf", path, dev->name);
 	f = fopen(fn, "w");
 	if (f) {
 		write_option(f, "DEVICE", dev->name);
