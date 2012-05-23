@@ -59,6 +59,7 @@ __extern int setfsuid(uid_t);
 #define F_OK	0		/* Existence */
 
 __extern int access(const char *, int);
+__extern int faccessat(int, const char *, int, int);
 __extern int link(const char *, const char *);
 __extern int linkat(int, const char *, int, const char *);
 __extern int unlink(const char *);
