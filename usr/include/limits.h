@@ -39,4 +39,6 @@
 #include <bitsize/limits.h>
 #include <linux/limits.h>
 
+#define SSIZE_MAX	LONG_MAX
+
 #endif				/* _LIMITS_H */
