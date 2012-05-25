@@ -33,7 +33,7 @@ b) If you're cross-compiling, you need to set KLIBCARCH to the
 
    The following is the last known status of various architectures:
 
-   alpha:	 Working
+   alpha:	 Runtime breakage
    arm-thumb:	 Untested
    arm:		 Working
    arm26:	 Not yet ported
@@ -44,19 +44,18 @@ b) If you're cross-compiling, you need to set KLIBCARCH to the
    ia64:	 Working static, shared untested
    m32r:	 Untested
    m68k:	 Working
-   m68knommu:	 Not yet ported
    mips:	 Working
    mips64:	 Not yet ported
-   parisc:	 Working
+   parisc:	 Untested
    parisc64:	 Not yet ported
    ppc:		 Working
    ppc64:	 Working
    s390:	 Working
    s390x:	 Working
-   sh:		 Untested
+   sh:		 Runtime breakage
    sh64:	 Not yet ported
    sparc:	 Working
-   sparc64:	 Untested
+   sparc64:	 Working
    v850:	 Not yet ported
    x86-64:	 Working
    xtensa:	 Not yet ported
