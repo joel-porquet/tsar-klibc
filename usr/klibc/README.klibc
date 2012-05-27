@@ -33,7 +33,7 @@ b) If you're cross-compiling, you need to set KLIBCARCH to the
 
    The following is the last known status of various architectures:
 
-   alpha:	 Runtime breakage
+   alpha:	 Working
    arm-thumb:	 Untested
    arm:		 Working
    arm26:	 Not yet ported

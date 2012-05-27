@@ -202,8 +202,9 @@ ssize_t sendfile64,sendfile::sendfile(int, int, off_t *, size_t, off_t);
  * sanitizing <signal.h> for all architectures, sigh.  See <klibc/config.h>.
  */
 #if _KLIBC_USE_RT_SIG
-<!sparc,sparc64> int rt_sigaction::__rt_sigaction(int, const struct sigaction *, struct sigaction *, size_t);
+<!sparc,sparc64,alpha> int rt_sigaction::__rt_sigaction(int, const struct sigaction *, struct sigaction *, size_t);
 <sparc,sparc64> int rt_sigaction::__rt_sigaction(int, const struct sigaction *, struct sigaction *, void *, size_t);
+<alpha> int rt_sigaction::__rt_sigaction(int, const struct sigaction *, struct sigaction *, size_t, void *);
 int rt_sigsuspend::__rt_sigsuspend(const sigset_t *, size_t);
 int rt_sigpending::__rt_sigpending(sigset_t *, size_t);
 int rt_sigprocmask::__rt_sigprocmask(int, const sigset_t *, sigset_t *, size_t);
