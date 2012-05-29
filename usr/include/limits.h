@@ -5,6 +5,9 @@
 #ifndef _LIMITS_H
 #define _LIMITS_H
 
+/* No multibyte characters seen */
+#define MB_LEN_MAX 1
+
 #define OPEN_MAX        256
 
 #define CHAR_BIT	8
