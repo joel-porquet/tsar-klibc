@@ -329,9 +329,9 @@ int nfs_mount(const char *pathname, const char *hostname,
 bail:
 	if (mounted) {
 		if (data->flags & NFS_MOUNT_VER3)
-			umount_v3(path, clnt);
+			umount_v3(rem_path, clnt);
 		else
-			umount_v2(path, clnt);
+			umount_v2(rem_path, clnt);
 	}
 
 	ret = -1;
