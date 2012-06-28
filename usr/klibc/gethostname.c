@@ -11,7 +11,7 @@ int gethostname(char *name, size_t len)
 {
 	struct utsname un;
 
-	if (!uname(&un))
+	if (uname(&un))
 		return -1;
 
 	if (len < strlen(un.nodename) + 1) {
