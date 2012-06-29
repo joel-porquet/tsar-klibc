@@ -1,6 +1,8 @@
 #ifndef _KLIBC_ARCHSTAT_H
 #define _KLIBC_ARCHSTAT_H
 
+#include <sys/types.h>
+
 #define _STATBUF_ST_NSEC
 
 struct stat {
@@ -10,7 +12,7 @@ struct stat {
 	unsigned long		st_ino;
 
 	mode_t			st_mode;
-	nlink_t			st_nlink;
+	__u32			st_nlink;
 
 	uid_t			st_uid;
 	gid_t			st_gid;
