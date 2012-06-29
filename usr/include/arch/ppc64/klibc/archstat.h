@@ -8,7 +8,7 @@
 struct stat {
 	__stdev64	(st_dev);
 	ino_t		st_ino;
-	nlink_t		st_nlink;
+	unsigned long	st_nlink;
 	mode_t		st_mode;
 	uid_t 		st_uid;
 	gid_t 		st_gid;
