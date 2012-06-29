@@ -41,7 +41,9 @@ setjmp:
 longjmp:
 	ldmia	r0, {r4, r5, r6, r7, r8, r9, r10, fp, sp, lr}
 	mov	r0, r1
-	BX(lr)
+	bne	1f
+	mov	r0, #1
+1:	BX(lr)
 	.size longjmp,.-longjmp
 
 #else /* __thumb__ */
