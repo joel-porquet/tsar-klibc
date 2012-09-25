@@ -23,6 +23,7 @@
 #undef FD_SET
 #undef FD_CLR
 #undef FD_ISSET
+#undef FD_SETSIZE
 
 __extern void *memset(void *, int, size_t);
 static inline void FD_ZERO(fd_set *__fdsetp)
@@ -44,6 +45,8 @@ static inline int FD_ISSET(int __fd, fd_set *__fdsetp)
 	return (__fdsetp->fds_bits[__fd/BITS_PER_LONG] >>
 		(__fd % BITS_PER_LONG)) & 1;
 }
+
+#define FD_SETSIZE __FD_SETSIZE
 
 __extern int gettimeofday(struct timeval *, struct timezone *);
 __extern int settimeofday(const struct timeval *, const struct timezone *);
