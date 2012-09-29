@@ -19,7 +19,7 @@ ifeq ($(CONFIG_KLIBC_THUMB),y)
 CPU_ARCH := $(CPU_ARCH)t
 KLIBCREQFLAGS += -mthumb
 KLIBCLDFLAGS  += --thumb-entry _start
-KLIBCEMAIN     = --thumb-entry _start
+KLIBCEMAIN     = --thumb-entry main
 KLIBCREQFLAGS += -mabi=aapcs-linux
 KLIBCSHAREDFLAGS = -Ttext 0x380200
 else
