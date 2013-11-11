@@ -36,6 +36,7 @@ b) If you're cross-compiling, you need to set KLIBCARCH to the
    arm-thumb:	 Untested
    arm:		 Working
    arm26:	 Not yet ported
+   arm64:	 Working
    avr32:	 Not yet ported
    cris:	 Working
    h8300:	 Not yet ported
