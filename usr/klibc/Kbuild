@@ -58,6 +58,9 @@ klib-y += vsnprintf.o snprintf.o vsprintf.o sprintf.o \
 	  inet/inet_ntoa.o inet/inet_aton.o inet/inet_addr.o \
 	  inet/inet_ntop.o inet/inet_pton.o inet/bindresvport.o \
 	  send.o recv.o \
+	  access.o chmod.o chown.o dup2.o mknod.o poll.o rename.o stat.o \
+	  lchown.o link.o rmdir.o unlink.o utimes.o lstat.o mkdir.o \
+	  readlink.o select.o symlink.o pipe.o \
 	  ctype/isalnum.o ctype/isalpha.o ctype/isascii.o \
 	  ctype/isblank.o ctype/iscntrl.o ctype/isdigit.o \
 	  ctype/isgraph.o ctype/islower.o ctype/isprint.o \
