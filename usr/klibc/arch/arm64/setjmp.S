@@ -4,8 +4,6 @@
 # setjmp/longjmp for arm64
 #
 
-#include <klibc/asmmacros.h>
-
 # we specify -mgeneral-regs-only as a build flag thus do not need to
 # save d8-d15
 

@@ -4,7 +4,6 @@
  * vfork - a system call which must not use the stack.
  */
 
-#include <klibc/asmmacros.h>
 #include <asm/unistd.h>
 
 	.type	vfork,#function

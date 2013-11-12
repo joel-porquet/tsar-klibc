@@ -10,7 +10,6 @@ sub make_sysstub($$$$$@) {
 
     open(OUT, '>', "${outputdir}/${fname}.S");
     print  OUT "#include <asm/unistd.h>\n";
-    print  OUT "#include <klibc/asmmacros.h>\n";
     print  OUT "	.text\n";
     print  OUT "	.type	${fname}, #function\n";
     print  OUT "	.globl	${fname}\n";
