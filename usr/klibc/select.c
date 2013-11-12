@@ -8,10 +8,10 @@
 
 struct __pselect6;
 __extern int __pselect6(int, fd_set *, fd_set *, fd_set *,
-                        const struct timespec *, const struct __pselect6 *);
+			const struct timespec *, const struct __pselect6 *);
 
 int select(int nfds, fd_set *readfds, fd_set *writefds,
-			fd_set *exceptfds, struct timeval *timeout)
+	   fd_set *exceptfds, struct timeval *timeout)
 {
 	int result;
 	struct timespec ts;

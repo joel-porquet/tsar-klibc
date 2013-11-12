@@ -4,7 +4,7 @@
 
 #ifndef __NR_poll
 
-int poll (struct pollfd *fds, nfds_t nfds, long timeout)
+int poll(struct pollfd *fds, nfds_t nfds, long timeout)
 {
 	struct timespec timeout_ts;
 	struct timespec *timeout_ts_p = NULL;
