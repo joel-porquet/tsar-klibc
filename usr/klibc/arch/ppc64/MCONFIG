@@ -9,6 +9,7 @@
 
 KLIBCARCHREQFLAGS = -m64
 KLIBCARCHREQFLAGS += $(call cc-option, -mcall-aixdesc, )
+KLIBCARCHREQFLAGS += $(call cc-option, -mcmodel=small, )
 KLIBCOPTFLAGS     += -Os
 KLIBCBITSIZE      = 64
 
