@@ -10,8 +10,8 @@ gzip-y   := gzip.o util.o unzip.o inflate.o
 always := gunzip zcat
 
 # Optional ZIP support
-gzip-$(CONFIG_KLIB_ZIP)   += zip.o deflate.o trees.o bits.o
-cflags-$(CONFIG_KLIB_ZIP) += -DSUPPORT_ZIP
+gzip-$(CONFIG_KLIBC_ZIP)   += zip.o deflate.o trees.o bits.o
+cflags-$(CONFIG_KLIBC_ZIP) += -DSUPPORT_ZIP
 EXTRA_KLIBCCFLAGS := $(cflags-y)
 
 # Additionally linked targets
