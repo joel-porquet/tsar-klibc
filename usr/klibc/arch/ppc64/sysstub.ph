@@ -9,22 +9,35 @@ sub make_sysstub($$$$$@) {
     my($outputdir, $fname, $type, $sname, $stype, @args) = @_;
 
     open(OUT, '>', "${outputdir}/${fname}.S");
-    print OUT "#include <asm/unistd.h>\n";
-    print OUT "\n";
-    print OUT "\t.globl ${fname}\n";
-    print OUT "\t.section \".opd\",\"aw\"\n";
-    print OUT "\t.align 3\n";
-    print OUT "${fname}:\n";
-    print OUT "\t.quad .${fname},.TOC.\@tocbase,0\n";
-    print OUT "\t.text\n";
-    print OUT "\t.type .${fname},\@function\n";
-    print OUT "\t.globl .${fname}\n";
-    print OUT ".${fname}:\n";
-    print OUT "\tli 0,__NR_${sname}\n";
-    print OUT "\tsc\n";
-    print OUT "\tbnslr\n";
-    print OUT "\tb .__syscall_error\n";
-    print OUT "\t.size .${fname},.-.${fname}\n";
+    print OUT <<EOF;
+#include <asm/unistd.h>
+
+	.text
+	.balign 4
+	.globl	${fname}
+#if _CALL_ELF == 2
+	.type ${fname},\@function
+${fname}:
+#else
+	.section ".opd","aw"
+	.balign 8
+${fname}:
+	.quad	.${fname}, .TOC.\@tocbase, 0
+	.previous
+	.type	.${fname},\@function
+	.globl	.${fname}
+.${fname}:
+#endif
+	li	0, __NR_${sname}
+	sc
+	bnslr
+	b	__syscall_error
+#if _CALL_ELF == 2
+	.size ${fname},.-${fname}
+#else
+	.size ${fname},.-.${fname}
+#endif
+EOF
     close(OUT);
 }
 

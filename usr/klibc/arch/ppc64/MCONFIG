@@ -7,10 +7,10 @@
 # accordingly.
 #
 
-KLIBCARCHREQFLAGS = -m64 -mcall-aixdesc
+KLIBCARCHREQFLAGS = -m64
+KLIBCARCHREQFLAGS += $(call cc-option, -mcall-aixdesc, )
 KLIBCOPTFLAGS     += -Os
 KLIBCBITSIZE      = 64
-KLIBCLDFLAGS      = -m elf64ppc
 
 # Extra linkflags when building the shared version of the library
 # This address needs to be reachable using normal inter-module

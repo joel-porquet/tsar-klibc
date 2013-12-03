@@ -5,17 +5,21 @@
 #
 
 	.text
-	.align 4
-
-	.section ".opd","aw"
-setjmp:
-	.quad	.setjmp,.TOC.@tocbase,0
-	.previous
-	.size	setjmp,24
-	.type	.setjmp,@function
+	.balign 4
 	.globl	setjmp
+#if _CALL_ELF == 2
+	.type setjmp,@function
+setjmp:
+#else
+	.section ".opd","aw"
+	.balign 8
+setjmp:
+	.quad	.setjmp, .TOC.@tocbase, 0
+	.previous
+	.type	.setjmp,@function
 	.globl	.setjmp
 .setjmp:
+#endif
 	mflr	%r11			/* save return address */
 	mfcr	%r12			/* save condition register */
 	std	%r2,0(%r3)		/* save TOC pointer (not needed) */
@@ -43,17 +47,28 @@ setjmp:
 	std	%r31,8(%r3)
 	li	%r3,0			/* indicate success */
 	blr				/* return */
+#if _CALL_ELF == 2
+	.size setjmp,.-setjmp
+#else
+	.size setjmp,.-.setjmp
+#endif
 
-	.size .setjmp,.-.setjmp
-	.section ".opd","aw"
-longjmp:
-	.quad	.longjmp,.TOC.@tocbase,0
-	.previous
-	.size	longjmp,24
-	.type	.longjmp,@function
+	.text
+	.balign 4
 	.globl	longjmp
+#if _CALL_ELF == 2
+	.type longjmp,@function
+longjmp:
+#else
+	.section ".opd","aw"
+	.balign 8
+longjmp:
+	.quad	.longjmp, .TOC.@tocbase, 0
+	.previous
+	.type	.longjmp,@function
 	.globl	.longjmp
 .longjmp:
+#endif
 	ld	%r2,0(%r3)		/* restore TOC pointer (not needed) */
 	ldu	%r1,8(%r3)		/* restore stack */
 	ldu	%r11,8(%r3)
@@ -81,5 +96,8 @@ longjmp:
 	mtcr	%r12			/* restore CR */
 	mr	%r3,%r4			/* get return value */
 	blr				/* return */
-
-	.size .longjmp,.-.longjmp
+#if _CALL_ELF == 2
+	.size longjmp,.-longjmp
+#else
+	.size longjmp,.-.longjmp
+#endif
