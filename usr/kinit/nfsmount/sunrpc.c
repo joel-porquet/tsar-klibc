@@ -149,7 +149,7 @@ struct client *tcp_client(uint32_t server, uint16_t port, uint32_t flags)
 		goto bail;
 	}
 
-	memset(clnt, 0, sizeof(clnt));
+	memset(clnt, 0, sizeof(*clnt));
 
 	if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1) {
 		perror("socket");
@@ -194,7 +194,7 @@ struct client *udp_client(uint32_t server, uint16_t port, uint32_t flags)
 		goto bail;
 	}
 
-	memset(clnt, 0, sizeof(clnt));
+	memset(clnt, 0, sizeof(*clnt));
 
 	if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
 		perror("socket");
