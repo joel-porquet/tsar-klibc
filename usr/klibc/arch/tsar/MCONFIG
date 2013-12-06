@@ -1,0 +1,6 @@
+KLIBCARCHREQFLAGS = -Werror -fno-pic -mno-abicalls -G 0
+KLIBCOPTFLAGS += -Os
+KLIBCBITSIZE = 32
+
+# Extra linkflags when building the shared version of the library
+#KLIBCSHAREDFLAGS = -T $(src)/arch/$(KLIBCARCH)/klibc.ld

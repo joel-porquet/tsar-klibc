@@ -1,0 +1,15 @@
+klib-y := setjmp.o syscall.o
+
+# libgcc stuff
+klib-y += ../../libgcc/__ashldi3.o
+klib-y += ../../libgcc/__ashrdi3.o
+klib-y += ../../libgcc/__clzsi2.o
+klib-y += ../../libgcc/__divdi3.o
+#klib-y += ../../libgcc/__lshrdi3.o
+klib-y += ../../libgcc/__moddi3.o
+klib-y += ../../libgcc/__udivdi3.o
+klib-y += ../../libgcc/__udivmoddi4.o
+klib-y += ../../libgcc/__umoddi3.o
+
+always := crt0.o
+targets := crt0.o
