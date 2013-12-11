@@ -1,6 +1,8 @@
-KLIBCARCHREQFLAGS = -Werror -fno-pic -mno-abicalls -G 0
+KLIBCARCHREQFLAGS = -fno-pic -mno-abicalls -G 0
 KLIBCOPTFLAGS += -Os
 KLIBCBITSIZE = 32
 
 # Extra linkflags when building the shared version of the library
-#KLIBCSHAREDFLAGS = -T $(src)/arch/$(KLIBCARCH)/klibc.ld
+# on tsar/mips, binaries are loaded at 4MB. Place klibc.so a little before
+# that, at 2MB to avoid any overlap.
+KLIBCSHAREDFLAGS = -Ttext-segment 0x00200000
