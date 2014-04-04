@@ -5,7 +5,7 @@
 
 #include <machine/asm.h>
 
-ENTRY(__start)
+ENTRY(_start)
 	/* make room for a stackframe */
 	subu	sp, 32
 	sw	zero, 16(sp)
@@ -22,4 +22,4 @@ ENTRY(__start)
 
 	/* jump to first C function */
 	jal	__libc_init
-ENDPROC(__start)
+ENDPROC(_start)
